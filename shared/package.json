@@ -1,0 +1,9 @@
+{
+  "name": "alertasimica-shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tipos y utilidades compartidas entre backend y frontend de AlertaSísmica",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "packageManager": "pnpm@11.20.0"
+}

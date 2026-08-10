@@ -1,0 +1,49 @@
+{
+  "name": "AlertaSísmica",
+  "short_name": "AlertaSísmica",
+  "description": "Monitoreo sísmico en tiempo real para Colombia. Consulta eventos sísmicos y recibe alertas según tu ubicación.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["weather", "utilities", "news"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Últimos sismos",
+      "short_name": "Sismos",
+      "url": "/earthquakes",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Activar alertas",
+      "short_name": "Alertas",
+      "url": "/settings/alerts",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
