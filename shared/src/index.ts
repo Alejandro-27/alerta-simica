@@ -208,6 +208,21 @@ export const COLOMBIA_BOUNDS: [[number, number], [number, number]] = [
 
 export const COLOMBIA_CENTER: [number, number] = [4.2, -73.0];
 
+/**
+ * Caja delimitadora aproximada de Colombia para filtrar eventos por alcance
+ * (límite marítimo holgado: incluye costa Pacífica/Caribe y San Andrés).
+ */
+export const COLOMBIA_BBOX = {
+  minLatitude: -4.5,
+  maxLatitude: 14.0,
+  minLongitude: -82.0,
+  maxLongitude: -66.0,
+};
+
+/** Alcance geográfico de una consulta de eventos. */
+export type EarthquakeScope = 'co' | 'world';
+
+
 /** Departamentos de Colombia (para selección manual de ubicación). */
 export const COLOMBIA_DEPARTMENTS = [
   'Amazonas', 'Antioquia', 'Arauca', 'Atlántico', 'Bolívar', 'Boyacá', 'Caldas',
@@ -252,4 +267,107 @@ export function formatDistanceKm(km: number): string {
 export function formatMagnitude(mag: number | null | undefined): string {
   if (mag === null || mag === undefined) return 'N/D';
   return mag.toFixed(1);
+}
+
+/** Tiempo relativo en español, p. ej. "hace 5 min" o "hace 2 h". */
+export function formatRelativeTime(iso: string | Date, now: Date = new Date()): string {
+  const t = typeof iso === 'string' ? new Date(iso) : iso;
+  const diffMs = Math.max(0, now.getTime() - t.getTime());
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return 'hace un momento';
+  if (min < 60) return `hace ${min} min`;
+  const hours = Math.floor(min / 60);
+  if (hours < 24) return `hace ${hours} h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `hace ${days} día${days === 1 ? '' : 's'}`;
+  return new Intl.DateTimeFormat('es-CO', { dateStyle: 'short' }).format(t);
+}
+
+export type SeverityLevel = 'low' | 'moderate' | 'strong' | 'very_strong';
+
+export interface SeverityInfo {
+  level: SeverityLevel;
+  label: string;
+  /** Texto muy corto para chips/insignias. */
+  shortLabel: string;
+  /** Descripción en lenguaje claro de lo que se siente (sin prometer daños). */
+  description: string;
+  color: string;
+}
+
+/** Descripción sencilla de la profundidad de un sismo. */
+export function depthCategory(depthKm: number): {
+  label: string;
+  shortLabel: string;
+} {
+  if (depthKm < 70) return { label: 'Superficial (menos de 70 km)', shortLabel: 'Superficial' };
+  if (depthKm <= 300) return { label: 'Intermedia (70 a 300 km)', shortLabel: 'Intermedia' };
+  return { label: 'Profunda (más de 300 km)', shortLabel: 'Profunda' };
+}
+
+const SEVERITY_MAP: Array<{
+  min: number;
+  label: string;
+  shortLabel: string;
+  description: string;
+  color: string;
+}> = [
+  {
+    min: 6.5,
+    label: 'Muy fuerte',
+    shortLabel: 'Muy fuerte',
+    description:
+      'Sismo de gran magnitud que el público puede percibir con fuerza; puede haber daños estructurales según la distancia al epicentro.',
+    color: 'text-red-300 bg-red-500/15 border-red-500/40',
+  },
+  {
+    min: 5.0,
+    label: 'Fuerte',
+    shortLabel: 'Fuerte',
+    description:
+      'Todos lo perciben en la zona cercana; objetos pueden caerse. La intensidad depende de la distancia y de la construcción.',
+    color: 'text-orange-300 bg-orange-500/15 border-orange-500/40',
+  },
+  {
+    min: 3.9,
+    label: 'Moderado',
+    shortLabel: 'Moderado',
+    description:
+      'Se siente como el paso de un camión pesado; en general no causa daños, aunque puede asustar a quienes están cerca.',
+    color: 'text-amber-300 bg-amber-500/15 border-amber-500/40',
+  },
+  {
+    min: 0,
+    label: 'Bajo',
+    shortLabel: 'Bajo',
+    description:
+      'Sismo de baja magnitud; por lo general no se siente o se percibe apenas si estás muy cerca del epicentro.',
+    color: 'text-emerald-300 bg-emerald-500/15 border-emerald-500/40',
+  },
+];
+
+/**
+ * Clasifica un sismo en una escala sencilla de severidad para el público general,
+ * combinando magnitud y profundidad. No predice daños: solo orienta la percepción.
+ */
+export function severityFromEvent(e: { magnitude: number; depth: number }): SeverityInfo {
+  for (const level of SEVERITY_MAP) {
+    if (e.magnitude >= level.min) {
+      return {
+        level: level.min >= 6.5 ? 'very_strong' : level.min >= 5 ? 'strong' : level.min >= 3.9 ? 'moderate' : 'low',
+        label: level.label,
+        shortLabel: level.shortLabel,
+        description: level.description,
+        color: level.color,
+      };
+    }
+  }
+  const low = SEVERITY_MAP[SEVERITY_MAP.length - 1];
+  return {
+    level: 'low',
+    label: low.label,
+    shortLabel: low.shortLabel,
+    description: low.description,
+    color: low.color,
+  };
 }

@@ -14,10 +14,12 @@ export const earthquakeListQuerySchema = paginationSchema.extend({
   department: z.string().optional(),
   municipality: z.string().optional(),
   maxDepth: z.coerce.number().min(0).optional(),
+  minDepth: z.coerce.number().min(0).optional(),
   near: z
     .string()
     .regex(/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/, 'Formato lat,lon')
     .optional(),
+  scope: z.enum(['co', 'world']).optional(),
 });
 
 export const adminEarthquakeQuerySchema = earthquakeListQuerySchema.extend({

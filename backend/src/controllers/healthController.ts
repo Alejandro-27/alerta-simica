@@ -27,10 +27,13 @@ export async function health(_req: Request, res: Response) {
       continue;
     }
     const st = statuses.find((s) => s.source === name);
-    const enabled = (await import('../services/alertConfigService'))
-      .getAlertConfig()
-      .then((c) => c.sources[name]?.enabled ?? true);
-    earthquakeSources[name] = st?.status ?? (await enabled) ? 'down' : 'disabled';
+    if (st) {
+      earthquakeSources[name] = st.status;
+      continue;
+    }
+    const enabled = (await (await import('../services/alertConfigService')).getAlertConfig())
+      .sources[name]?.enabled ?? true;
+    earthquakeSources[name] = enabled ? 'down' : 'disabled';
   }
 
   res.json({

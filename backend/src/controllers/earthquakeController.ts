@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Earthquake } from '../models/Earthquake';
 import { earthquakeListQuerySchema } from '../validators/validators';
 import { ApiError } from '../utils/errors';
-import { calculateDistanceKm } from '../../../shared/src';
+import { calculateDistanceKm, COLOMBIA_BBOX } from '../../../shared/src';
 
 const SOURCE_LABELS: Record<string, string> = {
   sgc: 'Servicio Geológico Colombiano (SGC)',
@@ -88,9 +88,18 @@ export async function listEarthquakes(req: Request, res: Response) {
     if (q.maxMagnitude !== undefined) filter.magnitude.$lte = q.maxMagnitude;
   }
   if (q.source) filter.source = q.source;
-  if (q.maxDepth !== undefined) filter.depth = { $lte: q.maxDepth };
+  if (q.maxDepth !== undefined || q.minDepth !== undefined) {
+    filter.depth = {};
+    if (q.maxDepth !== undefined) filter.depth.$lte = q.maxDepth;
+    if (q.minDepth !== undefined) filter.depth.$gte = q.minDepth;
+  }
   if (q.department) filter['place'] = { $regex: q.department, $options: 'i' };
   if (q.municipality) filter['place'] = { $regex: q.municipality, $options: 'i' };
+
+  if ((q.scope ?? 'co') === 'co') {
+    filter.latitude = { $gte: COLOMBIA_BBOX.minLatitude, $lte: COLOMBIA_BBOX.maxLatitude };
+    filter.longitude = { $gte: COLOMBIA_BBOX.minLongitude, $lte: COLOMBIA_BBOX.maxLongitude };
+  }
 
   filter.demo = { $ne: true };
   if (q.source === 'mock') delete filter.demo;
@@ -123,12 +132,15 @@ export async function getEarthquake(req: Request, res: Response) {
 export async function recentEarthquakes(req: Request, res: Response) {
   const hours = Math.min(parseInt(String(req.query.hours ?? '48'), 10) || 48, 168);
   const since = new Date(Date.now() - hours * 3600_000);
-  const items = await Earthquake.find({
+  const scope = req.query.scope === 'world' ? 'world' : 'co';
+  const filter: Record<string, any> = {
     eventTime: { $gte: since },
     demo: { $ne: true },
-  })
-    .sort({ eventTime: -1 })
-    .limit(50)
-    .lean();
-  res.json({ items: items.map((d) => serialize(d as unknown as Record<string, unknown>)), hours });
+  };
+  if (scope === 'co') {
+    filter.latitude = { $gte: COLOMBIA_BBOX.minLatitude, $lte: COLOMBIA_BBOX.maxLatitude };
+    filter.longitude = { $gte: COLOMBIA_BBOX.minLongitude, $lte: COLOMBIA_BBOX.maxLongitude };
+  }
+  const items = await Earthquake.find(filter).sort({ eventTime: -1 }).limit(50).lean();
+  res.json({ items: items.map((d) => serialize(d as unknown as Record<string, unknown>)), hours, scope });
 }

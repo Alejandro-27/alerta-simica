@@ -24,9 +24,11 @@ Base URL: `http://localhost:4000/api` (en producción, tu dominio). Formato JSON
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
-| GET | `/earthquakes?page=1&pageSize=20&source=&minMagnitude=&country=CO` | Lista paginada → `{ items, total, page, pageSize, totalPages }` |
-| GET | `/earthquakes/recent?hours=48` | Últimos eventos (máx. 50, excluye demo) |
+| GET | `/earthquakes?page=1&pageSize=20&scope=co&source=&minMagnitude=&maxDepth=&minDepth=&from=&to=&department=` | Lista paginada → `{ items, total, page, pageSize, totalPages }` |
+| GET | `/earthquakes/recent?hours=48&scope=co` | Últimos eventos (máx. 50, excluye demo) |
 | GET | `/earthquakes/:id` | Detalle → `{ earthquake }` |
+
+**Alcance geográfico (`scope`)**: `co` (default) limita a Colombia y alrededores mediante coordenadas (bbox); `world` devuelve todo el mundo. La UI usa `co` por defecto con un toggle "Todo el mundo".
 
 `earthquake`: `{ id, externalId, source, sourceLabel, magnitude, magnitudeType, latitude, longitude, depth, place, eventTime, tsunami, felt, alertLevel, status, sourceUrl, firstDetectedAt, lastSeenAt, demo, distanceKm, level, hasRawData }`.
 - `level` (solo `earthquakes/:id` calcula distancia al usuario; el badge `level` se deriva exclusivamente de la alerta oficial de la fuente, `null` si no hay).

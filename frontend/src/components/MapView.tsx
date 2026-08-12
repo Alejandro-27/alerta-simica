@@ -2,7 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { EarthquakeRecord } from '@shared';
-import { COLOMBIA_BOUNDS, COLOMBIA_CENTER, formatDate, formatMagnitude } from '@shared';
+import {
+  COLOMBIA_BOUNDS,
+  COLOMBIA_CENTER,
+  depthCategory,
+  formatMagnitude,
+  formatRelativeTime,
+  severityFromEvent,
+} from '@shared';
 
 interface MapViewProps {
   events: EarthquakeRecord[];
@@ -14,18 +21,7 @@ interface MapViewProps {
   selectedId?: string | null;
 }
 
-function magnitudeColor(mag: number): string {
-  if (mag >= 6) return '#ef4444';
-  if (mag >= 5) return '#f59e0b';
-  if (mag >= 4) return '#38bdf8';
-  return '#64748b';
-}
-
-function magnitudeRadius(mag: number): number {
-  return Math.max(6, Math.min(18, 4 + mag * 2));
-}
-
-/** Mapa Leaflet + OpenStreetMap con epicentros, radios y marcador de usuario. */
+/** Mapa Leaflet + OpenStreetMap con navegación libre, epicentros y marcador de usuario. */
 export default function MapView({
   events,
   userLocation,
@@ -45,9 +41,8 @@ export default function MapView({
     if (!containerRef.current || mapRef.current) return;
     const map = L.map(containerRef.current, {
       center: COLOMBIA_CENTER,
-      zoom: 6,
-      maxBounds: COLOMBIA_BOUNDS,
-      maxBoundsViscosity: 0.6,
+      zoom: 5,
+      worldCopyJump: true,
       attributionControl: true,
     });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -70,19 +65,27 @@ export default function MapView({
     layer.clearLayers();
 
     for (const ev of events) {
-      const size = magnitudeRadius(ev.magnitude);
+      const severity = severityFromEvent(ev);
+      const size = Math.max(7, Math.min(20, 5 + ev.magnitude * 1.8));
       const marker = L.circleMarker([ev.latitude, ev.longitude], {
         radius: size,
-        color: selectedId === ev.id ? '#ffffff' : magnitudeColor(ev.magnitude),
-        weight: selectedId === ev.id ? 3 : 2,
-        fillColor: magnitudeColor(ev.magnitude),
-        fillOpacity: 0.75,
+        color: selectedId === ev.id ? '#ffffff' : '#0b1526',
+        weight: selectedId === ev.id ? 3 : 1.5,
+        fillColor: severity.level === 'very_strong' ? '#ef4444' : severity.level === 'strong' ? '#f97316' : severity.level === 'moderate' ? '#f59e0b' : '#34d399',
+        fillOpacity: 0.85,
       });
-      const popup = L.popup({ maxWidth: 280 }).setContent(
-        `<strong>M${formatMagnitude(ev.magnitude)}</strong> — ${ev.place}<br/>
-         ${formatDate(ev.eventTime)}<br/>
-         Profundidad: ${Math.round(ev.depth)} km · Fuente: ${ev.source.toUpperCase()}`,
-      );
+      const popupHtml = `
+        <div style="min-width:200px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-size:20px;font-weight:800">M${formatMagnitude(ev.magnitude)}</span>
+            <span style="font-size:11px;color:#94a3b8">${severity.shortLabel}</span>
+          </div>
+          <div style="font-size:13px;line-height:1.4">${ev.place}</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px">
+            ${formatRelativeTime(ev.eventTime)} · ${depthCategory(ev.depth).shortLabel.toLowerCase()} · ${ev.source.toUpperCase()}
+          </div>
+        </div>`;
+      const popup = L.popup({ maxWidth: 300 }).setContent(popupHtml);
       marker.bindPopup(popup);
       marker.on('click', () => onSelect?.(ev));
       marker.addTo(layer);
@@ -103,7 +106,7 @@ export default function MapView({
         userMarkerRef.current = L.circleMarker([userLocation.latitude, userLocation.longitude], {
           interactive: false,
           radius: 7,
-          color: '#22c55e',
+          color: '#ffffff',
           weight: 2,
           fillColor: '#22c55e',
           fillOpacity: 0.9,
@@ -121,10 +124,47 @@ export default function MapView({
     if (events.length > 0) {
       mapRef.current.fitBounds(
         L.latLngBounds(events.map((e) => [e.latitude, e.longitude] as [number, number])),
-        { padding: [24, 24], maxZoom: 8 },
+        { padding: [32, 32], maxZoom: 10 },
       );
     }
   }, [events, userLocation, ready, showRadii, radiusKm, onSelect, selectedId]);
 
-  return <div ref={containerRef} style={{ height }} className="w-full rounded-xl" aria-label="Mapa de eventos sísmicos" />;
+  const focusColombia = () => {
+    mapRef.current?.setView(COLOMBIA_CENTER, 6, { animate: true });
+  };
+
+  const focusWorld = () => {
+    if (events.length > 0) {
+      mapRef.current?.fitBounds(
+        L.latLngBounds(events.map((e) => [e.latitude, e.longitude] as [number, number])),
+        { padding: [24, 24], maxZoom: 4 },
+      );
+    } else {
+      mapRef.current?.setView(L.latLngBounds(COLOMBIA_BOUNDS).getCenter(), 2, { animate: true });
+    }
+  };
+
+  return (
+    <div className="relative w-full overflow-hidden rounded-2xl border border-white/5">
+      <div ref={containerRef} style={{ height }} className="w-full" aria-label="Mapa de eventos sísmicos" />
+      <div className="absolute right-3 top-3 z-[1000] flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={focusColombia}
+          className="rounded-lg border border-white/10 bg-seismic-800/90 px-3 py-1.5 text-xs font-medium text-slate-200 shadow-lg backdrop-blur hover:bg-seismic-700"
+          title="Centrar en Colombia"
+        >
+          🇨🇴 Colombia
+        </button>
+        <button
+          type="button"
+          onClick={focusWorld}
+          className="rounded-lg border border-white/10 bg-seismic-800/90 px-3 py-1.5 text-xs font-medium text-slate-200 shadow-lg backdrop-blur hover:bg-seismic-700"
+          title="Ver todos los eventos en el mundo"
+        >
+          🌎 Mundo
+        </button>
+      </div>
+    </div>
+  );
 }

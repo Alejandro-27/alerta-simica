@@ -156,7 +156,8 @@ export const endpoints = {
 
   earthquakes: (params: string) => apiFetch<Paginated<EarthquakeRecord>>(`/earthquakes?${params}`),
   earthquake: (id: string) => apiFetch<{ earthquake: EarthquakeRecord }>(`/earthquakes/${id}`),
-  recentEarthquakes: (hours = 48) => apiFetch<{ items: EarthquakeRecord[]; hours: number }>(`/earthquakes/recent?hours=${hours}`),
+  recentEarthquakes: (hours = 48, scope: 'co' | 'world' = 'co') =>
+    apiFetch<{ items: EarthquakeRecord[]; hours: number; scope: string }>(`/earthquakes/recent?hours=${hours}&scope=${scope}`),
 
   getProfile: () => apiFetch<{ user: PublicUser }>('/user/profile'),
   updateProfile: (b: Record<string, unknown>) => apiPut<{ user: PublicUser }>('/user/profile', b),
