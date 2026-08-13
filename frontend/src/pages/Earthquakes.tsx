@@ -176,6 +176,11 @@ export default function Earthquakes() {
             <div>
               <label htmlFor="f-to" className="label">Hasta</label>
               <input id="f-to" type="date" className="input" value={filters.to} onChange={(e) => update({ to: e.target.value })} />
+              {(filters.from || filters.to) && (
+                <p className="mt-1 text-xs text-body-faint">
+                  Para fechas antiguas se descarga el historial de USGS; la primera consulta puede tardar unos segundos.
+                </p>
+              )}
             </div>
             <div>
               <label htmlFor="f-minmag" className="label">

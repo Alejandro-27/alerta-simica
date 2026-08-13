@@ -188,6 +188,17 @@ describe('Filtros de listado de sismos', () => {
     const ids = res.body.items.map((i: { externalId: string }) => i.externalId);
     expect(ids).toEqual(['co-1']);
   });
+
+  it('consulta con rango histórico funciona sin romper (backfill omitido en test)', async () => {
+    await seedEarthquakes();
+    const res = await request(app).get(
+      '/api/earthquakes?scope=co&from=2026-08-01T00:00:00.000Z&to=2026-08-10T23:59:59.000Z&pageSize=50',
+    );
+    expect(res.status).toBe(200);
+    const ids = res.body.items.map((i: { externalId: string }) => i.externalId);
+    expect(ids).toContain('co-1');
+    expect(ids).toContain('co-2');
+  });
 });
 
 describe('Manejo de errores y seguridad', () => {

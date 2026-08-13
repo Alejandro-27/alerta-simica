@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import { Earthquake } from '../models/Earthquake';
 import type { EarthquakeInput } from '../../../shared/src';
+import { COLOMBIA_BBOX } from '../../../shared/src';
+import { USGSEarthquakeProvider } from '../adapters/USGSEarthquakeProvider';
+import { env } from '../config/env';
 
 export interface ProcessEarthquakeResult {
   created: boolean;
@@ -103,6 +106,112 @@ export async function upsertEarthquake(event: EarthquakeInput): Promise<ProcessE
   await existing.save();
 
   return { created: false, updated: true, changed: true, doc: toResult(existing) };
+}
+
+/**
+ * Tamaño máximo de un rango histórico por consulta (en días). El USGS limita
+ * cada respuesta a 20.000 eventos; con estos pisos de magnitud es seguro.
+ */
+const BACKFILL_MAX_SPAN_DAYS = 60;
+/** Cada ventana de descarga se divide en trozos de 14 días. */
+const BACKFILL_CHUNK_DAYS = 14;
+/** Magnitud mínima del backfill según alcance (volumen razonable). */
+const BACKFILL_MAG_FLOOR = { co: 2.5, world: 4.5 } as const;
+
+const backfillLocks = new Map<string, Promise<number>>();
+
+/**
+ * Descarga on-demand del historial del USGS para cubrir un rango de fechas
+ * pasado que aún no está en la base. No genera alertas: solo persiste datos.
+ * Se guardan firstDetectedAt/lastSeenAt = eventTime (evento histórico cerrado).
+ */
+export async function backfillHistoricalRange(opts: {
+  from: Date;
+  to: Date;
+  scope: 'co' | 'world';
+  minMagnitude?: number;
+}): Promise<{ fetched: number }> {
+  if (env.isTest || !env.backfillEnabled) return { fetched: 0 };
+
+  const now = Date.now();
+  const DAY = 86400_000;
+  const spanStart = Math.max(opts.from.getTime(), now - BACKFILL_MAX_SPAN_DAYS * DAY);
+
+  const oldest = await Earthquake.findOne({ demo: { $ne: true } })
+    .sort({ eventTime: 1 })
+    .lean();
+  const gapEnd = oldest ? oldest.eventTime.getTime() : opts.to.getTime();
+
+  const from = Math.min(spanStart, gapEnd);
+  const to = Math.min(opts.to.getTime(), gapEnd, now);
+  if (from >= to) return { fetched: 0 };
+
+  const floor = Math.max(
+    opts.minMagnitude ?? 0,
+    BACKFILL_MAG_FLOOR[opts.scope],
+  );
+  const provider = new USGSEarthquakeProvider(env.usgsApiUrl);
+
+  let fetched = 0;
+  for (let s = from; s < to; s += BACKFILL_CHUNK_DAYS * DAY) {
+    const e = Math.min(s + BACKFILL_CHUNK_DAYS * DAY, to);
+    const key = `${new Date(s).toISOString()}_${new Date(e).toISOString()}`;
+    let task = backfillLocks.get(key);
+    if (!task) {
+      task = (async () => {
+        const { events } = await provider.getHistoricalEarthquakes({
+          start: new Date(s),
+          end: new Date(e),
+          minMagnitude: floor,
+          bbox: opts.scope === 'co' ? COLOMBIA_BBOX : undefined,
+        });
+        if (events.length > 0) await bulkUpsertHistorical(events);
+        return events.length;
+      })();
+      backfillLocks.set(key, task);
+      void task.then(
+        () => backfillLocks.delete(key),
+        () => backfillLocks.delete(key),
+      );
+    }
+    fetched += await task;
+  }
+  return { fetched };
+}
+
+/** Inserta/actualiza en lote eventos históricos (dedupe por externalId+source). */
+async function bulkUpsertHistorical(events: EarthquakeInput[]): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ops: any[] = events.map((e) => ({
+    updateOne: {
+      filter: { externalId: e.externalId, source: e.source },
+      update: {
+        $set: {
+          magnitude: e.magnitude,
+          magnitudeType: e.magnitudeType,
+          latitude: e.latitude,
+          longitude: e.longitude,
+          depth: e.depth,
+          place: e.place,
+          eventTime: e.eventTime,
+          updatedAt: e.updatedAt,
+          tsunami: e.tsunami,
+          felt: e.felt,
+          alertLevel: e.alertLevel,
+          status: e.status,
+          sourceUrl: e.sourceUrl,
+          rawData: e.rawData,
+        },
+        $setOnInsert: {
+          firstDetectedAt: e.eventTime,
+          lastSeenAt: e.eventTime,
+          demo: false,
+        },
+      },
+      upsert: true,
+    },
+  }));
+  await Earthquake.bulkWrite(ops, { ordered: false });
 }
 
 function toResult(doc: unknown): ProcessEarthquakeResult['doc'] {

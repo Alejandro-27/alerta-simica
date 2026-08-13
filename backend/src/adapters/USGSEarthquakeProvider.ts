@@ -4,6 +4,16 @@ import type { ProviderResult, EarthquakeProvider } from './types';
 export const DEFAULT_USGS_URL =
   'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson';
 
+/** API FDSN para consultas históricas por rango de fechas. */
+export const USGS_FDSN_QUERY_URL = 'https://earthquake.usgs.gov/fdsnws/event/1/query';
+
+export interface HistoricalQueryOptions {
+  start: Date;
+  end: Date;
+  minMagnitude?: number;
+  bbox?: { minLatitude: number; maxLatitude: number; minLongitude: number; maxLongitude: number };
+}
+
 function num(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
@@ -29,12 +39,40 @@ export class USGSEarthquakeProvider implements EarthquakeProvider {
     if (!this.isConfigured()) {
       throw new Error('USGS_API_URL no está configurada');
     }
-    const started = Date.now();
+    return this.fetchEvents(this.url);
+  }
+
+  /**
+   * Consulta histórica por rango de fechas usando el API FDSN
+   * (https://earthquake.usgs.gov/fdsnws/event/1/query).
+   * Permite limitar por magnitud y por caja geográfica.
+   */
+  async getHistoricalEarthquakes(opts: HistoricalQueryOptions): Promise<ProviderResult> {
+    if (!this.isConfigured()) {
+      throw new Error('USGS_API_URL no está configurada');
+    }
+    const params = new URLSearchParams({
+      format: 'geojson',
+      starttime: opts.start.toISOString(),
+      endtime: opts.end.toISOString(),
+      orderby: 'time',
+    });
+    if (opts.minMagnitude !== undefined) params.set('minmagnitude', String(opts.minMagnitude));
+    if (opts.bbox) {
+      params.set('minlatitude', String(opts.bbox.minLatitude));
+      params.set('maxlatitude', String(opts.bbox.maxLatitude));
+      params.set('minlongitude', String(opts.bbox.minLongitude));
+      params.set('maxlongitude', String(opts.bbox.maxLongitude));
+    }
+    return this.fetchEvents(`${USGS_FDSN_QUERY_URL}?${params.toString()}`);
+  }
+
+  private async fetchEvents(url: string): Promise<ProviderResult> {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
+    const timeout = setTimeout(() => controller.abort(), 30000);
     let res: Response;
     try {
-      res = await fetch(this.url, {
+      res = await fetch(url, {
         signal: controller.signal,
         headers: { accept: 'application/json', 'user-agent': 'AlertaSimica/1.0' },
       });
@@ -51,7 +89,7 @@ export class USGSEarthquakeProvider implements EarthquakeProvider {
     const events = data.features
       .map((f) => this.normalize(f))
       .filter((e): e is EarthquakeInput => e !== null);
-    return { events, queriedUrl: this.url };
+    return { events, queriedUrl: url };
   }
 
   private normalize(feature: unknown): EarthquakeInput | null {

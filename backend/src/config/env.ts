@@ -47,6 +47,7 @@ export const env = {
     .filter(Boolean),
   mockEnabled: (process.env.EARTHQUAKE_MOCK_ENABLED ?? 'false') === 'true',
   mockIntervalMinutes: parseInt(process.env.EARTHQUAKE_MOCK_INTERVAL_MINUTES ?? '15', 10),
+  backfillEnabled: (process.env.EARTHQUAKE_BACKFILL_ENABLED ?? 'true') === 'true',
   logLevel: process.env.LOG_LEVEL ?? 'info',
   logFormat: isProd ? 'json' : (process.env.LOG_FORMAT ?? 'pretty'),
 };

@@ -30,6 +30,8 @@ Base URL: `http://localhost:4000/api` (en producción, tu dominio). Formato JSON
 
 **Alcance geográfico (`scope`)**: `co` (default) limita a Colombia y alrededores mediante coordenadas (bbox); `world` devuelve todo el mundo. La UI usa `co` por defecto con un toggle "Todo el mundo".
 
+**Historial (`from`/`to`)**: si el rango solicitado es pasado y no está cubierto en la base, el backend descarga on-demand el historial del USGS (FDSN, `starttime`/`endtime`) y lo persiste antes de responder. Límites: 60 días por consulta, magnitud mínima 2.5 (Colombia) / 4.5 (mundo). Se puede desactivar con `EARTHQUAKE_BACKFILL_ENABLED=false`. Los eventos descargados no generan alertas.
+
 `earthquake`: `{ id, externalId, source, sourceLabel, magnitude, magnitudeType, latitude, longitude, depth, place, eventTime, tsunami, felt, alertLevel, status, sourceUrl, firstDetectedAt, lastSeenAt, demo, distanceKm, level, hasRawData }`.
 - `level` (solo `earthquakes/:id` calcula distancia al usuario; el badge `level` se deriva exclusivamente de la alerta oficial de la fuente, `null` si no hay).
 - `distanceKm`: distancia del epicentro a la ubicación registrada del usuario (solo con sesión y ubicación).

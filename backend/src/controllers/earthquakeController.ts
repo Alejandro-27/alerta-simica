@@ -3,6 +3,8 @@ import { Earthquake } from '../models/Earthquake';
 import { earthquakeListQuerySchema } from '../validators/validators';
 import { ApiError } from '../utils/errors';
 import { calculateDistanceKm, COLOMBIA_BBOX, findDepartmentBBox } from '../../../shared/src';
+import { backfillHistoricalRange } from '../services/earthquakeService';
+import { env } from '../config/env';
 
 const SOURCE_LABELS: Record<string, string> = {
   sgc: 'Servicio Geológico Colombiano (SGC)',
@@ -76,6 +78,20 @@ function mapDisplayLevel(alertLevel: string | null): 'NORMAL' | 'WARNING' | 'HIG
 export async function listEarthquakes(req: Request, res: Response) {
   const q = earthquakeListQuerySchema.parse(req.query);
   const filter: Record<string, any> = {};
+
+  // Rango histórico no cubierto: descargar on-demand del USGS (no genera alertas).
+  if (q.from && !env.isTest) {
+    try {
+      await backfillHistoricalRange({
+        from: new Date(q.from),
+        to: q.to ? new Date(q.to) : new Date(),
+        scope: (q.scope ?? 'co') === 'world' ? 'world' : 'co',
+        minMagnitude: q.minMagnitude,
+      });
+    } catch (err) {
+      console.warn('[backfill] falló la descarga histórica:', err instanceof Error ? err.message : err);
+    }
+  }
 
   if (q.from || q.to) {
     filter.eventTime = {};
