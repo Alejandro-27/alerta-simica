@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Earthquake } from '../models/Earthquake';
 import { earthquakeListQuerySchema } from '../validators/validators';
 import { ApiError } from '../utils/errors';
-import { calculateDistanceKm, COLOMBIA_BBOX } from '../../../shared/src';
+import { calculateDistanceKm, COLOMBIA_BBOX, findDepartmentBBox } from '../../../shared/src';
 
 const SOURCE_LABELS: Record<string, string> = {
   sgc: 'Servicio Geológico Colombiano (SGC)',
@@ -93,10 +93,16 @@ export async function listEarthquakes(req: Request, res: Response) {
     if (q.maxDepth !== undefined) filter.depth.$lte = q.maxDepth;
     if (q.minDepth !== undefined) filter.depth.$gte = q.minDepth;
   }
-  if (q.department) filter['place'] = { $regex: q.department, $options: 'i' };
+  const dept = q.department ? findDepartmentBBox(q.department) : null;
+  if (dept) {
+    filter.latitude = { $gte: dept.bbox.minLatitude, $lte: dept.bbox.maxLatitude };
+    filter.longitude = { $gte: dept.bbox.minLongitude, $lte: dept.bbox.maxLongitude };
+  } else if (q.department) {
+    filter['place'] = { $regex: q.department, $options: 'i' };
+  }
   if (q.municipality) filter['place'] = { $regex: q.municipality, $options: 'i' };
 
-  if ((q.scope ?? 'co') === 'co') {
+  if ((q.scope ?? 'co') === 'co' && !dept) {
     filter.latitude = { $gte: COLOMBIA_BBOX.minLatitude, $lte: COLOMBIA_BBOX.maxLatitude };
     filter.longitude = { $gte: COLOMBIA_BBOX.minLongitude, $lte: COLOMBIA_BBOX.maxLongitude };
   }

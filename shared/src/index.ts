@@ -233,6 +233,79 @@ export const COLOMBIA_DEPARTMENTS = [
   'Bogotá D.C.',
 ];
 
+export interface BoundingBox {
+  minLatitude: number;
+  maxLatitude: number;
+  minLongitude: number;
+  maxLongitude: number;
+}
+
+/**
+ * Cajas delimitadoras APROXIMADAS de cada departamento de Colombia.
+ * Útiles para filtrar eventos por coordenadas (lat/lng) cuando el texto
+ * del lugar no menciona el departamento (p. ej. datos del USGS).
+ * Los límites son holgados y pueden solaparse entre departamentos vecinos.
+ */
+export const DEPARTMENT_BBOXES: Record<string, BoundingBox> = {
+  'Amazonas': { minLatitude: -4.5, maxLatitude: -0.5, minLongitude: -74.8, maxLongitude: -69.5 },
+  'Antioquia': { minLatitude: 5.4, maxLatitude: 8.9, minLongitude: -77.0, maxLongitude: -73.8 },
+  'Arauca': { minLatitude: 6.0, maxLatitude: 7.2, minLongitude: -72.3, maxLongitude: -69.5 },
+  'Atlántico': { minLatitude: 10.3, maxLatitude: 11.1, minLongitude: -75.2, maxLongitude: -74.7 },
+  'Bogotá D.C.': { minLatitude: 4.4, maxLatitude: 4.9, minLongitude: -74.2, maxLongitude: -73.9 },
+  'Bolívar': { minLatitude: 7.8, maxLatitude: 10.3, minLongitude: -75.0, maxLongitude: -73.5 },
+  'Boyacá': { minLatitude: 4.6, maxLatitude: 7.1, minLongitude: -74.5, maxLongitude: -71.5 },
+  'Caldas': { minLatitude: 4.9, maxLatitude: 5.6, minLongitude: -75.9, maxLongitude: -74.7 },
+  'Caquetá': { minLatitude: -0.5, maxLatitude: 2.5, minLongitude: -76.5, maxLongitude: -71.5 },
+  'Casanare': { minLatitude: 4.2, maxLatitude: 6.4, minLongitude: -73.2, maxLongitude: -69.5 },
+  'Cauca': { minLatitude: 1.3, maxLatitude: 3.4, minLongitude: -78.0, maxLongitude: -75.5 },
+  'Cesar': { minLatitude: 7.5, maxLatitude: 10.9, minLongitude: -74.3, maxLongitude: -72.7 },
+  'Chocó': { minLatitude: 3.8, maxLatitude: 8.7, minLongitude: -77.9, maxLongitude: -75.5 },
+  'Córdoba': { minLatitude: 7.2, maxLatitude: 9.4, minLongitude: -76.8, maxLongitude: -74.7 },
+  'Cundinamarca': { minLatitude: 3.9, maxLatitude: 5.8, minLongitude: -75.0, maxLongitude: -73.0 },
+  'Guainía': { minLatitude: 1.0, maxLatitude: 4.2, minLongitude: -70.8, maxLongitude: -66.5 },
+  'Guaviare': { minLatitude: 0.5, maxLatitude: 3.2, minLongitude: -74.0, maxLongitude: -70.0 },
+  'Huila': { minLatitude: 1.5, maxLatitude: 3.9, minLongitude: -76.4, maxLongitude: -74.5 },
+  'La Guajira': { minLatitude: 10.4, maxLatitude: 12.5, minLongitude: -73.6, maxLongitude: -71.0 },
+  'Magdalena': { minLatitude: 8.8, maxLatitude: 11.3, minLongitude: -74.9, maxLongitude: -73.2 },
+  'Meta': { minLatitude: 1.6, maxLatitude: 4.9, minLongitude: -74.4, maxLongitude: -69.8 },
+  'Nariño': { minLatitude: 0.1, maxLatitude: 2.8, minLongitude: -79.0, maxLongitude: -76.8 },
+  'Norte de Santander': { minLatitude: 6.9, maxLatitude: 9.3, minLongitude: -73.6, maxLongitude: -71.8 },
+  'Putumayo': { minLatitude: -0.6, maxLatitude: 1.5, minLongitude: -77.4, maxLongitude: -74.2 },
+  'Quindío': { minLatitude: 4.2, maxLatitude: 4.7, minLongitude: -75.8, maxLongitude: -75.3 },
+  'Risaralda': { minLatitude: 4.6, maxLatitude: 5.6, minLongitude: -76.3, maxLongitude: -75.4 },
+  'San Andrés y Providencia': { minLatitude: 12.3, maxLatitude: 13.5, minLongitude: -82.1, maxLongitude: -81.2 },
+  'Santander': { minLatitude: 5.7, maxLatitude: 8.3, minLongitude: -74.5, maxLongitude: -72.0 },
+  'Sucre': { minLatitude: 8.3, maxLatitude: 10.0, minLongitude: -75.8, maxLongitude: -74.6 },
+  'Tolima': { minLatitude: 3.0, maxLatitude: 5.5, minLongitude: -76.0, maxLongitude: -74.4 },
+  'Valle del Cauca': { minLatitude: 3.1, maxLatitude: 5.1, minLongitude: -77.8, maxLongitude: -75.7 },
+  'Vaupés': { minLatitude: -0.5, maxLatitude: 2.0, minLongitude: -71.5, maxLongitude: -69.0 },
+  'Vichada': { minLatitude: 3.0, maxLatitude: 6.4, minLongitude: -70.8, maxLongitude: -66.5 },
+};
+
+/** Normaliza un nombre de departamento: minúsculas y sin tildes. */
+export function normalizeDepartmentName(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+/**
+ * Busca la caja delimitadora de un departamento por nombre (acepta
+ * coincidencias parciales, p. ej. "Bogot" → "Bogotá D.C.").
+ * Devuelve null si no se reconoce.
+ */
+export function findDepartmentBBox(query: string): { name: string; bbox: BoundingBox } | null {
+  const q = normalizeDepartmentName(query);
+  if (!q) return null;
+  for (const [name, bbox] of Object.entries(DEPARTMENT_BBOXES)) {
+    const key = normalizeDepartmentName(name);
+    if (key === q || key.startsWith(q) || q.startsWith(key)) return { name, bbox };
+  }
+  return null;
+}
+
 /** Distancia entre dos puntos geográficos en kilómetros (fórmula de Haversine). */
 export function calculateDistanceKm(
   lat1: number,

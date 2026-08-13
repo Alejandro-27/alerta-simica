@@ -160,7 +160,7 @@ describe('Filtros de listado de sismos', () => {
     expect(res.body.items.map((i: { externalId: string }) => i.externalId)).toContain('mock-1');
   });
 
-  it('scope=co + department filtra por nombre de lugar', async () => {
+  it('scope=co + department filtra por caja geográfica del departamento', async () => {
     await seedEarthquakes();
     const res = await request(app).get('/api/earthquakes?scope=co&department=Bogot&pageSize=50');
     expect(res.status).toBe(200);
@@ -168,6 +168,15 @@ describe('Filtros de listado de sismos', () => {
     expect(ids).toContain('co-1');
     expect(ids).not.toContain('co-2');
     expect(ids).not.toContain('us-1');
+  });
+
+  it('department funciona aunque el texto del lugar no mencione el departamento', async () => {
+    await seedEarthquakes();
+    const res = await request(app).get('/api/earthquakes?scope=co&department=Antioquia&pageSize=50');
+    expect(res.status).toBe(200);
+    const ids = res.body.items.map((i: { externalId: string }) => i.externalId);
+    expect(ids).toContain('co-2');
+    expect(ids).not.toContain('co-1');
   });
 
   it('fechas y magnitud siguen funcionando en scope co', async () => {

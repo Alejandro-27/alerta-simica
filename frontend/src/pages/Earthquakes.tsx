@@ -110,37 +110,41 @@ export default function Earthquakes() {
     <div className="mx-auto max-w-6xl px-4 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white sm:text-3xl">Historial de sismos</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className="text-2xl font-extrabold tracking-tight text-body sm:text-3xl">Historial de sismos</h1>
+          <p className="mt-1 text-sm text-body-muted">
             Eventos detectados por SGC y USGS, del más reciente al más antiguo.
           </p>
         </div>
-        <span className="chip border-white/10 bg-white/5 text-slate-300">
+        <span className="chip border-line bg-surface-2 text-body-muted">
           {total} sismo{total === 1 ? '' : 's'}
         </span>
       </div>
 
       {/* Alcance */}
-      <div className="mt-6 flex rounded-xl border border-white/5 bg-seismic-850/60 p-1 text-sm font-medium">
+      <div className="mt-6 flex rounded-xl border border-line bg-surface-2 p-1 text-sm font-medium">
         <button
           type="button"
           onClick={() => update({ scope: 'co', department: '' })}
-          className={`flex-1 rounded-lg px-4 py-2 transition ${filters.scope === 'co' ? 'bg-accent/15 text-accent' : 'text-slate-400 hover:text-slate-200'}`}
+          className={`flex-1 rounded-lg px-4 py-2 transition ${
+            filters.scope === 'co' ? 'bg-accent text-white' : 'text-body-muted hover:text-body'
+          }`}
         >
-          🇨🇴 Colombia y alrededores
+          Colombia y alrededores
         </button>
         <button
           type="button"
           onClick={() => update({ scope: 'world', department: '' })}
-          className={`flex-1 rounded-lg px-4 py-2 transition ${filters.scope === 'world' ? 'bg-accent/15 text-accent' : 'text-slate-400 hover:text-slate-200'}`}
+          className={`flex-1 rounded-lg px-4 py-2 transition ${
+            filters.scope === 'world' ? 'bg-accent text-white' : 'text-body-muted hover:text-body'
+          }`}
         >
-          🌎 Todo el mundo
+          Todo el mundo
         </button>
       </div>
 
       {/* Filtros plegables */}
       <form
-        className="mt-4 overflow-hidden rounded-2xl border border-white/5 bg-seismic-850/60"
+        className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface"
         onSubmit={(e) => {
           e.preventDefault();
           void load(filters);
@@ -148,7 +152,7 @@ export default function Earthquakes() {
       >
         <button
           type="button"
-          className="flex w-full items-center justify-between px-5 py-3 text-left text-sm font-medium text-slate-300 hover:text-white"
+          className="flex w-full items-center justify-between px-5 py-3 text-left text-sm font-medium text-body hover:text-body-muted"
           onClick={() => setFiltersOpen((o) => !o)}
           aria-expanded={filtersOpen}
         >
@@ -157,14 +161,14 @@ export default function Earthquakes() {
             {activeCount > 0 && (
               <span className="badge border-accent/30 bg-accent/15 text-accent">{activeCount} activos</span>
             )}
-            <svg className={`h-4 w-4 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <svg className={`h-4 w-4 transition-transform text-body-muted ${filtersOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
             </svg>
           </span>
         </button>
 
         {filtersOpen && (
-          <div className="grid grid-cols-1 gap-4 border-t border-white/5 px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 border-t border-line px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label htmlFor="f-from" className="label">Desde</label>
               <input id="f-from" type="date" className="input" value={filters.from} onChange={(e) => update({ from: e.target.value })} />
@@ -183,7 +187,7 @@ export default function Earthquakes() {
                 min="0"
                 max="8"
                 step="0.5"
-                className="w-full accent-[#2dd4bf]"
+                className="w-full accent-[rgb(var(--color-accent))]"
                 value={filters.minMagnitude}
                 onChange={(e) => update({ minMagnitude: e.target.value })}
               />
@@ -205,6 +209,7 @@ export default function Earthquakes() {
                     <option key={d} value={d}>{d}</option>
                   ))}
                 </select>
+                <p className="mt-1 text-xs text-body-faint">Filtra por la zona geográfica del departamento.</p>
               </div>
             )}
             <div>
@@ -229,7 +234,7 @@ export default function Earthquakes() {
       </form>
 
       {loading ? (
-        <div className="mt-8 flex items-center gap-2 text-slate-400"><Spinner /> Cargando…</div>
+        <div className="mt-8 flex items-center gap-2 text-body-muted"><Spinner /> Cargando…</div>
       ) : error ? (
         <div className="mt-8"><ErrorState title="Error" body={error} /></div>
       ) : items.length === 0 ? (
