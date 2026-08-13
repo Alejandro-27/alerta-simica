@@ -15,7 +15,7 @@ export default function Pagination({ page, totalPages, total, onChange }: Pagina
 
   return (
     <nav className="mt-6 flex items-center justify-between gap-3" aria-label="Paginación">
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-body-faint">
         {total} resultado{total === 1 ? '' : 's'} · página {page} de {totalPages}
       </p>
       <div className="flex items-center gap-1">
@@ -28,7 +28,7 @@ export default function Pagination({ page, totalPages, total, onChange }: Pagina
             onClick={() => onChange(p)}
             aria-current={p === page ? 'page' : undefined}
             className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
-              p === page ? 'bg-amber-500 text-seismic-900' : 'text-slate-300 hover:bg-seismic-800'
+              p === page ? 'bg-accent text-white' : 'text-body-muted hover:bg-surface-2'
             }`}
           >
             {p}

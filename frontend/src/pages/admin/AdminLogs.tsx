@@ -5,10 +5,10 @@ import Pagination from '../../components/Pagination';
 import { ErrorState, Spinner } from '../../components/LoadingScreen';
 
 const levelColor: Record<string, string> = {
-  info: 'text-sky-300',
-  warn: 'text-amber-300',
-  error: 'text-red-300',
-  debug: 'text-slate-400',
+  info: 'text-accent',
+  warn: 'text-sev-moderate',
+  error: 'text-sev-critical',
+  debug: 'text-body-faint',
 };
 
 export default function AdminLogs() {
@@ -45,7 +45,7 @@ export default function AdminLogs() {
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-bold text-slate-100">Logs del sistema</h2>
+      <h2 className="mb-4 text-lg font-bold text-body">Logs del sistema</h2>
       <div className="mb-4 flex flex-wrap gap-2">
         <select className="input max-w-[180px]" value={level} onChange={(e) => { setLevel(e.target.value); setPage(1); }} aria-label="Filtrar por nivel">
           <option value="">Todos los niveles</option>
@@ -68,20 +68,20 @@ export default function AdminLogs() {
       </div>
       {error && <ErrorState title="Error" body={error} />}
       {loading ? (
-        <div className="flex items-center gap-2 text-slate-400"><Spinner /> Cargando…</div>
+        <div className="flex items-center gap-2 text-body-muted"><Spinner /> Cargando…</div>
       ) : (
         <>
           <ul className="space-y-2">
             {items.map((l) => (
               <li key={l.id} className="card !p-3 text-xs">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={`font-bold ${levelColor[l.level] ?? 'text-slate-300'}`}>{l.level.toUpperCase()}</span>
-                  <span className="badge border-seismic-600 bg-seismic-800 text-slate-400">{l.category}</span>
-                  <span className="text-slate-500">{new Date(l.timestamp).toLocaleString('es-CO')}</span>
+                  <span className={`font-bold ${levelColor[l.level] ?? 'text-body-muted'}`}>{l.level.toUpperCase()}</span>
+                  <span className="badge border-line bg-surface-3 text-body-muted">{l.category}</span>
+                  <span className="text-body-faint">{new Date(l.timestamp).toLocaleString('es-CO')}</span>
                 </div>
-                <p className="mt-1 text-slate-300">{l.message}</p>
+                <p className="mt-1 text-body-muted">{l.message}</p>
                 {Object.keys(l.meta ?? {}).length > 0 && (
-                  <pre className="mt-1 overflow-x-auto rounded bg-seismic-900 p-2 text-[10px] text-slate-500">
+                  <pre className="mt-1 overflow-x-auto rounded bg-surface-2 p-2 text-[10px] text-body-faint">
                     {JSON.stringify(l.meta, null, 1)}
                   </pre>
                 )}

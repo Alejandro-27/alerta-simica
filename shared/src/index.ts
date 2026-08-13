@@ -92,7 +92,13 @@ export interface PublicUser {
   active: boolean;
   phone: string | null;
   location: UserLocation | null;
-  locationManual: { country: string; department: string; municipality: string } | null;
+  locationManual: {
+    country: string;
+    department: string;
+    municipality: string;
+    latitude: number | null;
+    longitude: number | null;
+  } | null;
   alertSettings: AlertSettings;
   pushEnabled: boolean;
   createdAt: Date;
@@ -306,6 +312,213 @@ export function findDepartmentBBox(query: string): { name: string; bbox: Boundin
   return null;
 }
 
+export interface GeoCoords {
+  latitude: number;
+  longitude: number;
+}
+
+/**
+ * Coordenadas aproximadas (lat, lng) de los principales municipios de
+ * Colombia. Se usan para calcular distancias cuando el usuario registra su
+ * ubicación de forma manual (sin GPS). Precisión de referencia, no catastral.
+ */
+export const COLOMBIA_MUNICIPALITY_COORDS: Record<string, GeoCoords> = {
+  // Bogotá D.C. / Cundinamarca
+  'Bogotá': { latitude: 4.711, longitude: -74.072 },
+  'Soacha': { latitude: 4.579, longitude: -74.217 },
+  'Zipaquirá': { latitude: 5.024, longitude: -74.004 },
+  'Facatativá': { latitude: 4.814, longitude: -74.357 },
+  'Girardot': { latitude: 4.303, longitude: -74.8 },
+  'Chía': { latitude: 4.859, longitude: -74.059 },
+  'Cajicá': { latitude: 4.918, longitude: -74.028 },
+  'Fusagasugá': { latitude: 4.345, longitude: -74.364 },
+  'Mosquera': { latitude: 4.706, longitude: -74.233 },
+  'Madrid': { latitude: 4.732, longitude: -74.264 },
+  // Antioquia
+  'Medellín': { latitude: 6.244, longitude: -75.573 },
+  'Bello': { latitude: 6.337, longitude: -75.558 },
+  'Itagüí': { latitude: 6.172, longitude: -75.611 },
+  'Envigado': { latitude: 6.176, longitude: -75.593 },
+  'Rionegro': { latitude: 6.154, longitude: -75.373 },
+  'Apartadó': { latitude: 7.884, longitude: -76.626 },
+  'Turbo': { latitude: 8.093, longitude: -76.728 },
+  'Sonsón': { latitude: 5.71, longitude: -75.31 },
+  'Amagá': { latitude: 6.04, longitude: -75.703 },
+  'Jericó': { latitude: 5.792, longitude: -75.786 },
+  // Valle del Cauca
+  'Cali': { latitude: 3.452, longitude: -76.532 },
+  'Palmira': { latitude: 3.539, longitude: -76.303 },
+  'Buenaventura': { latitude: 3.877, longitude: -77.02 },
+  'Tuluá': { latitude: 4.086, longitude: -76.197 },
+  'Buga': { latitude: 3.9, longitude: -76.301 },
+  'Cartago': { latitude: 4.746, longitude: -75.912 },
+  'Jamundí': { latitude: 3.264, longitude: -76.544 },
+  'El Cerrito': { latitude: 3.685, longitude: -76.31 },
+  'Dagua': { latitude: 3.657, longitude: -76.688 },
+  'Ansermanuevo': { latitude: 4.798, longitude: -75.994 },
+  // Santander
+  'Bucaramanga': { latitude: 7.119, longitude: -73.123 },
+  'Floridablanca': { latitude: 7.063, longitude: -73.086 },
+  'Girón': { latitude: 7.07, longitude: -73.171 },
+  'Piedecuesta': { latitude: 6.99, longitude: -73.053 },
+  'Barrancabermeja': { latitude: 7.068, longitude: -73.851 },
+  'Zapatoca': { latitude: 6.815, longitude: -73.268 },
+  'San Gil': { latitude: 6.558, longitude: -73.134 },
+  'Socorro': { latitude: 6.468, longitude: -73.26 },
+  // Boyacá
+  'Tunja': { latitude: 5.535, longitude: -73.368 },
+  'Duitama': { latitude: 5.827, longitude: -73.031 },
+  'Sogamoso': { latitude: 5.716, longitude: -72.935 },
+  'Chiquinquirá': { latitude: 5.619, longitude: -73.818 },
+  'Paipa': { latitude: 5.78, longitude: -73.117 },
+  'Miraflores': { latitude: 5.195, longitude: -73.144 },
+  'Moniquirá': { latitude: 5.877, longitude: -73.57 },
+  // Caldas
+  'Manizales': { latitude: 5.07, longitude: -75.517 },
+  'Villamaría': { latitude: 5.044, longitude: -75.515 },
+  'Chinchiná': { latitude: 4.982, longitude: -75.605 },
+  'La Dorada': { latitude: 5.45, longitude: -74.667 },
+  'Riosucio': { latitude: 5.421, longitude: -75.706 },
+  'Neira': { latitude: 5.165, longitude: -75.517 },
+  // Quindío
+  'Armenia': { latitude: 4.534, longitude: -75.681 },
+  'Calarcá': { latitude: 4.529, longitude: -75.641 },
+  'Salento': { latitude: 4.637, longitude: -75.571 },
+  'Filandia': { latitude: 4.673, longitude: -75.659 },
+  'Montenegro': { latitude: 4.565, longitude: -75.749 },
+  'Quimbaya': { latitude: 4.628, longitude: -75.764 },
+  // Risaralda
+  'Pereira': { latitude: 4.813, longitude: -75.696 },
+  'Dosquebradas': { latitude: 4.835, longitude: -75.677 },
+  'Santa Rosa de Cabal': { latitude: 4.868, longitude: -75.621 },
+  'La Virginia': { latitude: 4.889, longitude: -75.886 },
+  'Quinchía': { latitude: 5.34, longitude: -75.731 },
+  // Tolima
+  'Ibagué': { latitude: 4.439, longitude: -75.232 },
+  'Espinal': { latitude: 4.149, longitude: -74.89 },
+  'Melgar': { latitude: 4.205, longitude: -74.642 },
+  'Líbano': { latitude: 4.922, longitude: -75.063 },
+  'Chaparral': { latitude: 3.724, longitude: -75.484 },
+  'Honda': { latitude: 5.207, longitude: -74.737 },
+  // Huila
+  'Neiva': { latitude: 2.927, longitude: -75.282 },
+  'Pitalito': { latitude: 1.854, longitude: -76.051 },
+  'Garzón': { latitude: 2.197, longitude: -75.63 },
+  'La Plata': { latitude: 2.391, longitude: -75.892 },
+  'Campoalegre': { latitude: 2.684, longitude: -75.323 },
+  // Meta
+  'Villavicencio': { latitude: 4.142, longitude: -73.627 },
+  'Acacías': { latitude: 3.987, longitude: -73.758 },
+  'Granada': { latitude: 3.545, longitude: -73.707 },
+  'Puerto López': { latitude: 4.09, longitude: -72.957 },
+  'El Calvario': { latitude: 4.352, longitude: -73.71 },
+  'San Martín': { latitude: 3.697, longitude: -73.7 },
+  // Nariño
+  'Pasto': { latitude: 1.214, longitude: -77.279 },
+  'Tumaco': { latitude: 1.791, longitude: -78.792 },
+  'Ipiales': { latitude: 0.825, longitude: -77.641 },
+  'Túquerres': { latitude: 1.089, longitude: -77.618 },
+  'Barbacoas': { latitude: 1.672, longitude: -78.145 },
+  // Cauca
+  'Popayán': { latitude: 2.441, longitude: -76.607 },
+  'Santander de Quilichao': { latitude: 3.013, longitude: -76.485 },
+  'Puerto Tejada': { latitude: 3.232, longitude: -76.417 },
+  'Timbío': { latitude: 2.353, longitude: -76.683 },
+  // Atlántico
+  'Barranquilla': { latitude: 10.969, longitude: -74.781 },
+  'Soledad': { latitude: 10.917, longitude: -74.765 },
+  'Malambo': { latitude: 10.859, longitude: -74.775 },
+  'Puerto Colombia': { latitude: 11.009, longitude: -74.955 },
+  // Magdalena
+  'Santa Marta': { latitude: 11.241, longitude: -74.199 },
+  'Ciénaga': { latitude: 11.006, longitude: -74.251 },
+  'Fundación': { latitude: 10.518, longitude: -74.19 },
+  'Aracataca': { latitude: 10.594, longitude: -74.184 },
+  // Córdoba
+  'Montería': { latitude: 8.748, longitude: -75.881 },
+  'Cereté': { latitude: 8.887, longitude: -75.791 },
+  'Lorica': { latitude: 9.233, longitude: -75.815 },
+  'Tierralta': { latitude: 8.169, longitude: -76.06 },
+  // Bolívar
+  'Cartagena': { latitude: 10.391, longitude: -75.479 },
+  'Magangué': { latitude: 9.239, longitude: -74.752 },
+  'Turbaco': { latitude: 10.333, longitude: -75.415 },
+  'El Carmen de Bolívar': { latitude: 9.717, longitude: -75.126 },
+  // La Guajira
+  'Riohacha': { latitude: 11.544, longitude: -72.907 },
+  'Maicao': { latitude: 11.38, longitude: -72.244 },
+  'Uribia': { latitude: 11.715, longitude: -72.266 },
+  'San Juan del Cesar': { latitude: 10.769, longitude: -73.006 },
+  // Cesar
+  'Valledupar': { latitude: 10.476, longitude: -73.247 },
+  'Aguachica': { latitude: 8.31, longitude: -73.617 },
+  'Codazzi': { latitude: 10.031, longitude: -73.241 },
+  'La Paz': { latitude: 10.387, longitude: -73.177 },
+  // Norte de Santander
+  'Cúcuta': { latitude: 7.894, longitude: -72.504 },
+  'Ocaña': { latitude: 8.237, longitude: -73.354 },
+  'Pamplona': { latitude: 7.377, longitude: -72.648 },
+  'Los Patios': { latitude: 7.843, longitude: -72.507 },
+  // Arauca
+  'Arauca': { latitude: 7.084, longitude: -70.759 },
+  'Saravena': { latitude: 6.959, longitude: -71.875 },
+  'Tame': { latitude: 6.459, longitude: -71.747 },
+  // Casanare
+  'Yopal': { latitude: 5.339, longitude: -72.394 },
+  'Aguazul': { latitude: 5.173, longitude: -72.548 },
+  'Villanueva': { latitude: 4.612, longitude: -72.929 },
+  // Sucre
+  'Sincelejo': { latitude: 9.299, longitude: -75.397 },
+  'Corozal': { latitude: 9.324, longitude: -75.292 },
+  'Sampués': { latitude: 9.183, longitude: -75.378 },
+  // Chocó
+  'Quibdó': { latitude: 5.692, longitude: -76.658 },
+  'Istmina': { latitude: 5.157, longitude: -76.687 },
+  'Acandí': { latitude: 8.514, longitude: -77.273 },
+  'Bahía Solano': { latitude: 6.23, longitude: -77.404 },
+  'Nuquí': { latitude: 5.706, longitude: -77.266 },
+  // Caquetá
+  'Florencia': { latitude: 1.614, longitude: -75.606 },
+  'San Vicente del Caguán': { latitude: 2.115, longitude: -74.765 },
+  // Putumayo
+  'Mocoa': { latitude: 1.148, longitude: -76.646 },
+  'Puerto Asís': { latitude: 0.505, longitude: -76.5 },
+  'Orito': { latitude: 0.669, longitude: -76.874 },
+  // Amazonas, Guainía, Guaviare, Vaupés, Vichada
+  'Leticia': { latitude: -4.215, longitude: -69.941 },
+  'Inírida': { latitude: 3.866, longitude: -67.924 },
+  'San José del Guaviare': { latitude: 2.567, longitude: -72.639 },
+  'Mitú': { latitude: 1.253, longitude: -70.234 },
+  'Puerto Carreño': { latitude: 6.189, longitude: -67.487 },
+  // San Andrés y Providencia
+  'San Andrés': { latitude: 12.585, longitude: -81.7 },
+  'Providencia': { latitude: 13.375, longitude: -81.366 },
+};
+
+/** Centro aproximado de un departamento (promedio de su caja). */
+export function departmentCenter(department: string): GeoCoords | null {
+  const bbox = DEPARTMENT_BBOXES[department];
+  if (!bbox) return null;
+  return {
+    latitude: (bbox.minLatitude + bbox.maxLatitude) / 2,
+    longitude: (bbox.minLongitude + bbox.maxLongitude) / 2,
+  };
+}
+
+/**
+ * Resuelve coordenadas para una ubicación manual en Colombia:
+ * municipio conocido → sus coordenadas; si no, centro del departamento;
+ * si nada coincide → null.
+ */
+export function resolveColombiaLocation(
+  department: string,
+  municipality: string,
+): GeoCoords | null {
+  const mun = COLOMBIA_MUNICIPALITY_COORDS[municipality?.trim() ?? ''];
+  if (mun) return mun;
+  return departmentCenter(department);
+}
+
 /** Distancia entre dos puntos geográficos en kilómetros (fórmula de Haversine). */
 export function calculateDistanceKm(
   lat1: number,
@@ -365,6 +578,7 @@ export interface SeverityInfo {
   shortLabel: string;
   /** Descripción en lenguaje claro de lo que se siente (sin prometer daños). */
   description: string;
+  /** Clase de token semántico: sev-low | sev-moderate | sev-strong | sev-critical. */
   color: string;
 }
 
@@ -391,7 +605,7 @@ const SEVERITY_MAP: Array<{
     shortLabel: 'Muy fuerte',
     description:
       'Sismo de gran magnitud que el público puede percibir con fuerza; puede haber daños estructurales según la distancia al epicentro.',
-    color: 'text-red-300 bg-red-500/15 border-red-500/40',
+    color: 'sev-critical',
   },
   {
     min: 5.0,
@@ -399,7 +613,7 @@ const SEVERITY_MAP: Array<{
     shortLabel: 'Fuerte',
     description:
       'Todos lo perciben en la zona cercana; objetos pueden caerse. La intensidad depende de la distancia y de la construcción.',
-    color: 'text-orange-300 bg-orange-500/15 border-orange-500/40',
+    color: 'sev-strong',
   },
   {
     min: 3.9,
@@ -407,7 +621,7 @@ const SEVERITY_MAP: Array<{
     shortLabel: 'Moderado',
     description:
       'Se siente como el paso de un camión pesado; en general no causa daños, aunque puede asustar a quienes están cerca.',
-    color: 'text-amber-300 bg-amber-500/15 border-amber-500/40',
+    color: 'sev-moderate',
   },
   {
     min: 0,
@@ -415,7 +629,7 @@ const SEVERITY_MAP: Array<{
     shortLabel: 'Bajo',
     description:
       'Sismo de baja magnitud; por lo general no se siente o se percibe apenas si estás muy cerca del epicentro.',
-    color: 'text-emerald-300 bg-emerald-500/15 border-emerald-500/40',
+    color: 'sev-low',
   },
 ];
 

@@ -9,6 +9,7 @@ import {
 import { User } from '../models/User';
 import { toPublicUser } from '../services/userService';
 import { ApiError } from '../utils/errors';
+import { resolveColombiaLocation } from '../../../shared/src';
 import bcrypt from 'bcryptjs';
 
 async function getCurrentUser(req: AuthRequest): Promise<InstanceType<typeof User>> {
@@ -55,7 +56,12 @@ export async function updateLocation(req: AuthRequest, res: Response) {
 export async function updateManualLocation(req: AuthRequest, res: Response) {
   const input = updateManualLocationSchema.parse(req.body);
   const user = await getCurrentUser(req);
-  user.locationManual = { ...input };
+  const coords = resolveColombiaLocation(input.department, input.municipality);
+  user.locationManual = {
+    ...input,
+    latitude: coords?.latitude ?? null,
+    longitude: coords?.longitude ?? null,
+  };
   await user.save();
   res.json({ user: toPublicUser(user.toObject()) });
 }

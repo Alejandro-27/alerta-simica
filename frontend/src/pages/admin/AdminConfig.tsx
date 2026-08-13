@@ -70,7 +70,7 @@ export default function AdminConfig() {
     }
   };
 
-  if (loading) return <div className="flex items-center gap-2 text-slate-400"><Spinner /> Cargando…</div>;
+  if (loading) return <div className="flex items-center gap-2 text-body-muted"><Spinner /> Cargando…</div>;
   if (error || !config) return <ErrorState title="Error" body={error ?? 'Sin configuración'} />;
 
   const toggleSource = (name: string) => {
@@ -87,7 +87,7 @@ export default function AdminConfig() {
   return (
     <div className="space-y-6">
       <div className="card">
-        <h2 className="mb-4 text-lg font-bold text-slate-100">Motor de alertas</h2>
+        <h2 className="mb-4 text-lg font-bold text-body">Motor de alertas</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="minMag" className="label">Magnitud mínima global</label>
@@ -116,26 +116,26 @@ export default function AdminConfig() {
           </div>
           <div className="flex items-end">
             <label className="flex cursor-pointer items-center gap-3">
-              <input type="checkbox" className="h-5 w-5 accent-amber-500" checked={config.enabled}
+              <input type="checkbox" className="h-5 w-5 accent-[rgb(var(--color-accent))]" checked={config.enabled}
                 onChange={(e) => setConfig({ ...config, enabled: e.target.checked })} />
-              <span className="text-sm font-medium text-slate-200">Motor de alertas activo</span>
+              <span className="text-sm font-medium text-body">Motor de alertas activo</span>
             </label>
           </div>
         </div>
         <button className="btn-primary mt-4" onClick={() => void save()} disabled={busy}>
           {busy && <Spinner />} Guardar configuración
         </button>
-        {msg && <p className="mt-2 text-sm text-green-400">{msg}</p>}
+        {msg && <p className="mt-2 text-sm text-sev-low">{msg}</p>}
       </div>
 
       <div className="card">
-        <h2 className="mb-4 text-lg font-bold text-slate-100">Fuentes sísmicas</h2>
+        <h2 className="mb-4 text-lg font-bold text-body">Fuentes sísmicas</h2>
         <div className="space-y-2">
           {Object.entries(config.sources).map(([name, s]) => (
-            <div key={name} className="flex items-center justify-between rounded-lg border border-seismic-700/60 bg-seismic-800 px-4 py-3">
+            <div key={name} className="flex items-center justify-between rounded-lg border border-line bg-surface-2 px-4 py-3">
               <div>
-                <p className="font-semibold text-slate-100">{name === 'sgc' ? 'SGC (Servicio Geológico Colombiano)' : name === 'usgs' ? 'USGS' : 'Mock (demo)'}</p>
-                <p className="text-xs text-slate-400">{s.enabled ? 'Consultada cada ciclo del scheduler' : 'Pausada'}</p>
+                <p className="font-semibold text-body">{name === 'sgc' ? 'SGC (Servicio Geológico Colombiano)' : name === 'usgs' ? 'USGS' : 'Mock (demo)'}</p>
+                <p className="text-xs text-body-muted">{s.enabled ? 'Consultada cada ciclo del scheduler' : 'Pausada'}</p>
               </div>
               <button className={s.enabled ? 'btn-secondary !py-1.5 text-xs' : 'btn-primary !py-1.5 text-xs'} onClick={() => toggleSource(name)}>
                 {s.enabled ? 'Desactivar' : 'Activar'}
@@ -146,7 +146,7 @@ export default function AdminConfig() {
       </div>
 
       <div className="card">
-        <h2 className="mb-4 text-lg font-bold text-slate-100">Enviar push de prueba</h2>
+        <h2 className="mb-4 text-lg font-bold text-body">Enviar push de prueba</h2>
         <form className="space-y-3" onSubmit={sendTest}>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -165,7 +165,7 @@ export default function AdminConfig() {
           <button type="submit" className="btn-primary" disabled={busy}>
             {busy && <Spinner />} Enviar push de prueba
           </button>
-          {pushResult && <p className="text-sm text-slate-300">{pushResult}</p>}
+          {pushResult && <p className="text-sm text-body-muted">{pushResult}</p>}
         </form>
       </div>
     </div>

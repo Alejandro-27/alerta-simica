@@ -37,7 +37,7 @@ export default function AdminNotifications() {
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-bold text-slate-100">Notificaciones</h2>
+      <h2 className="mb-4 text-lg font-bold text-body">Notificaciones</h2>
       <div className="mb-4">
         <select className="input max-w-[260px]" value={type} onChange={(e) => { setType(e.target.value); setPage(1); }} aria-label="Filtrar por tipo">
           <option value="">Todos los tipos</option>
@@ -49,12 +49,12 @@ export default function AdminNotifications() {
       </div>
       {error && <ErrorState title="Error" body={error} />}
       {loading ? (
-        <div className="flex items-center gap-2 text-slate-400"><Spinner /> Cargando…</div>
+        <div className="flex items-center gap-2 text-body-muted"><Spinner /> Cargando…</div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-seismic-700/60 bg-seismic-850">
+          <div className="overflow-x-auto rounded-xl border border-line bg-surface-2">
             <table className="w-full text-left text-sm">
-              <thead className="bg-seismic-800 text-xs uppercase text-slate-500">
+              <thead className="bg-surface-3 text-xs uppercase text-body-faint">
                 <tr>
                   <th className="px-4 py-3">Usuario</th>
                   <th className="px-4 py-3">Tipo</th>
@@ -66,28 +66,28 @@ export default function AdminNotifications() {
               </thead>
               <tbody>
                 {items.map((n) => (
-                  <tr key={n.id} className="border-t border-seismic-700/50 align-top">
-                    <td className="px-4 py-3 text-xs text-slate-300">
+                  <tr key={n.id} className="border-t border-line align-top">
+                    <td className="px-4 py-3 text-xs text-body-muted">
                       {n.user ? `${n.user.firstName ?? ''} ${n.user.lastName ?? ''}`.trim() || n.user.email : n.userId}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="badge border-seismic-600 bg-seismic-800 text-slate-300">{n.type}</span>
+                      <span className="badge border-line bg-surface-3 text-body-muted">{n.type}</span>
                     </td>
-                    <td className="max-w-[300px] px-4 py-3 text-xs text-slate-300">
-                      <p className="font-medium text-slate-100">{n.title}</p>
-                      <p className="truncate text-slate-400">{n.body}</p>
+                    <td className="max-w-[300px] px-4 py-3 text-xs text-body-muted">
+                      <p className="font-medium text-body">{n.title}</p>
+                      <p className="truncate text-body-muted">{n.body}</p>
                       {n.earthquakeId && (
-                        <Link to={`/earthquakes/${n.earthquakeId}`} className="text-amber-400 hover:underline">ver evento →</Link>
+                        <Link to={`/earthquakes/${n.earthquakeId}`} className="text-accent hover:underline">ver evento →</Link>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-400">{n.level}</td>
+                    <td className="px-4 py-3 text-xs text-body-muted">{n.level}</td>
                     <td className="px-4 py-3">
-                      <span className={`badge ${n.delivered ? 'border-green-500/30 bg-green-500/10 text-green-300' : 'border-red-500/30 bg-red-500/10 text-red-300'}`}>
+                      <span className={`badge ${n.delivered ? 'border-sev-low/30 bg-sev-low/10 text-sev-low' : 'border-sev-critical/30 bg-sev-critical/10 text-sev-critical'}`}>
                         {n.delivered ? 'Entregada' : 'Fallida'}
                       </span>
-                      {n.error && <p className="mt-1 max-w-[180px] truncate text-xs text-red-400" title={n.error}>{n.error}</p>}
+                      {n.error && <p className="mt-1 max-w-[180px] truncate text-xs text-sev-critical" title={n.error}>{n.error}</p>}
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-400">{new Date(n.sentAt).toLocaleString('es-CO')}</td>
+                    <td className="px-4 py-3 text-xs text-body-muted">{new Date(n.sentAt).toLocaleString('es-CO')}</td>
                   </tr>
                 ))}
               </tbody>

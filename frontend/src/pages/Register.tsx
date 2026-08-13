@@ -40,8 +40,8 @@ export default function Register() {
   return (
     <RedirectIfAuthed>
       <div className="mx-auto max-w-md px-4 py-16">
-        <h1 className="text-2xl font-extrabold text-white">Crear cuenta</h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <h1 className="text-2xl font-extrabold tracking-tight text-body">Crear cuenta</h1>
+        <p className="mt-1 text-sm text-body-muted">
           Tu ubicación es opcional: la usarás solo para recibir alertas cercanas.
         </p>
         <form className="card mt-6 space-y-4" onSubmit={submit}>
@@ -67,14 +67,14 @@ export default function Register() {
             <label htmlFor="confirm" className="label">Confirmar contraseña</label>
             <input id="confirm" type="password" required autoComplete="new-password" className="input" value={form.confirm} onChange={set('confirm')} />
           </div>
-          {error && <p className="text-sm text-red-400" role="alert">{error}</p>}
+          {error && <p className="text-sm text-sev-critical" role="alert">{error}</p>}
           <button type="submit" disabled={busy} className="btn-primary w-full">
             {busy && <Spinner />} Crear cuenta
           </button>
         </form>
-        <p className="mt-4 text-center text-sm text-slate-400">
+        <p className="mt-4 text-center text-sm text-body-muted">
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="font-medium text-amber-400 hover:underline">Inicia sesión</Link>
+          <Link to="/login" className="font-medium text-accent hover:underline">Inicia sesión</Link>
         </p>
       </div>
     </RedirectIfAuthed>

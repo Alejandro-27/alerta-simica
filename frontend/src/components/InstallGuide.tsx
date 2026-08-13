@@ -26,23 +26,23 @@ export default function InstallGuide({ compact = false }: { compact?: boolean })
 
   return (
     <div className="card">
-      <h3 className="mb-1 text-lg font-bold text-slate-100">Instalar aplicación</h3>
-      <p className="mb-4 text-sm text-slate-400">
+      <h3 className="mb-1 text-lg font-bold text-body">Instalar aplicación</h3>
+      <p className="mb-4 text-sm text-body-muted">
         Instala AlertaSísmica para abrirla como una app nativa y recibir notificaciones.
       </p>
 
       {install.isInstalled && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-300">
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-sev-low/30 bg-sev-low/10 px-3 py-2 text-sm text-sev-low">
           ✓ Aplicación instalada
         </div>
       )}
 
       {install.isIOS && !install.isInstalled && (
         <div className="mb-4">
-          <p className="mb-2 text-sm font-medium text-slate-200">En iPhone/iPad:</p>
-          <ol className="list-decimal space-y-1.5 pl-5 text-sm text-slate-300">
+          <p className="mb-2 text-sm font-medium text-body">En iPhone/iPad:</p>
+          <ol className="list-decimal space-y-1.5 pl-5 text-sm text-body-muted">
             <li>Abre esta página en <strong>Safari</strong>.</li>
-            <li>Pulsa el botón <strong>Compartir</strong> <span className="text-slate-500">(cuadro con flecha ↑)</span>.</li>
+            <li>Pulsa el botón <strong>Compartir</strong> <span className="text-body-faint">(cuadro con flecha ↑)</span>.</li>
             <li>Selecciona <strong>«Añadir a pantalla de inicio»</strong>.</li>
             <li>Abre la aplicación desde el nuevo icono.</li>
             <li>Pulsa <strong>«Activar alertas»</strong> para conceder permisos de notificación.</li>
@@ -71,9 +71,9 @@ export default function InstallGuide({ compact = false }: { compact?: boolean })
             {busy && <Spinner />}
             {caps.subscribed ? 'Notificaciones activadas' : 'Activar notificaciones'}
           </button>
-          {msg && <p className="mt-2 text-sm text-green-400">{msg}</p>}
+          {msg && <p className="mt-2 text-sm text-sev-low">{msg}</p>}
           {!compact && caps.isIOS && (
-            <p className="mt-3 text-xs text-slate-500">
+            <p className="mt-3 text-xs text-body-faint">
               En iOS, los permisos de notificación solo se pueden conceder desde la aplicación instalada.
             </p>
           )}
@@ -81,7 +81,7 @@ export default function InstallGuide({ compact = false }: { compact?: boolean })
       )}
 
       {!install.isInstalled && install.isIOS && (
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-body-faint">
           Las notificaciones en iOS requieren la aplicación instalada y el permiso concedido desde ella.
         </p>
       )}

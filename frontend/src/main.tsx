@@ -8,8 +8,7 @@ import './index.css';
 
 // Anti-flash: set theme class before React hydrates
 const savedTheme = localStorage.getItem('alertasimica_theme');
-const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-const themeToApply = savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : systemTheme;
+const themeToApply = savedTheme === 'dark' ? 'dark' : 'light';
 document.documentElement.classList.add(themeToApply);
 
 // Registrar el Service Worker solo donde hay soporte (no en tests).

@@ -6,6 +6,7 @@ import { createApp } from '../src/app';
 import { User } from '../src/models/User';
 import { Earthquake } from '../src/models/Earthquake';
 import { PushSubscription } from '../src/models/PushSubscriptionDoc';
+import { calculateDistanceKm } from '@shared';
 import bcrypt from 'bcryptjs';
 import type { Express } from 'express';
 
@@ -198,6 +199,106 @@ describe('Filtros de listado de sismos', () => {
     const ids = res.body.items.map((i: { externalId: string }) => i.externalId);
     expect(ids).toContain('co-1');
     expect(ids).toContain('co-2');
+  });
+});
+
+describe('Distancia a la ubicación del usuario', () => {
+  async function seedUserWithManualLocation() {
+    const hash = await bcrypt.hash('password123', 10);
+    const user = await User.create({
+      firstName: 'U',
+      lastName: 'R',
+      email: 'dist@test.co',
+      passwordHash: hash,
+      role: 'USER',
+      active: true,
+      locationManual: {
+        country: 'Colombia',
+        department: 'Cundinamarca',
+        municipality: 'Bogotá',
+        latitude: 4.711,
+        longitude: -74.072,
+      },
+    });
+    const res = await request(app).post('/api/auth/login').send({ email: 'dist@test.co', password: 'password123' });
+    return { user, token: res.body.tokens.accessToken };
+  }
+
+  it('sin sesión: distanceKm es null', async () => {
+    await seedEarthquakes();
+    const res = await request(app).get('/api/earthquakes?pageSize=50');
+    expect(res.status).toBe(200);
+    for (const item of res.body.items) {
+      expect(item.distanceKm).toBeNull();
+    }
+  });
+
+  it('con ubicación manual guardada, distanceKm se calcula en la lista', async () => {
+    await seedEarthquakes();
+    const { token } = await seedUserWithManualLocation();
+    const res = await request(app)
+      .get('/api/earthquakes?pageSize=50')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    const co1 = res.body.items.find((i: { externalId: string }) => i.externalId === 'co-1');
+    expect(co1).toBeTruthy();
+    expect(co1.distanceKm).toBeGreaterThan(0);
+  });
+
+  it('ubicación manual sin coordenadas (legacy): distanceKm se resuelve al vuelo', async () => {
+    await seedEarthquakes();
+    const hash = await bcrypt.hash('password123', 10);
+    await User.create({
+      firstName: 'L',
+      lastName: 'G',
+      email: 'legacy@test.co',
+      passwordHash: hash,
+      role: 'USER',
+      active: true,
+      locationManual: {
+        country: 'Colombia',
+        department: 'Cundinamarca',
+        municipality: 'Bogotá',
+      },
+    });
+    const res = await request(app).post('/api/auth/login').send({ email: 'legacy@test.co', password: 'password123' });
+    const token = res.body.tokens.accessToken;
+    const list = await request(app)
+      .get('/api/earthquakes?pageSize=50')
+      .set('Authorization', `Bearer ${token}`);
+    expect(list.status).toBe(200);
+    const co1 = list.body.items.find((i: { externalId: string }) => i.externalId === 'co-1');
+    expect(co1).toBeTruthy();
+    expect(co1.distanceKm).toBe(calculateDistanceKm(4.6, -74.1, 4.711, -74.072));
+  });
+
+  it('el GPS (location) tiene prioridad sobre la ubicación manual', async () => {
+    await seedEarthquakes();
+    const { user, token } = await seedUserWithManualLocation();
+    user.location = { latitude: 6.244, longitude: -75.573, accuracy: 10, updatedAt: new Date() };
+    await user.save();
+    const res = await request(app)
+      .get('/api/earthquakes?pageSize=50')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    const co1 = res.body.items.find((i: { externalId: string }) => i.externalId === 'co-1');
+    const gpsKm = Math.round((co1 as { distanceKm: number }).distanceKm);
+    const manualKm = Math.round(
+      // 4.711,-74.072 → epicentro co-1 (4.6,-74.1)
+      calculateDistanceKm(4.6, -74.1, 4.711, -74.072),
+    );
+    expect(gpsKm).not.toBe(manualKm);
+    expect(gpsKm).toBe(Math.round(calculateDistanceKm(4.6, -74.1, 6.244, -75.573)));
+  });
+
+  it('GET /earthquakes/:id incluye distanceKm con sesión', async () => {
+    await seedEarthquakes();
+    const { token } = await seedUserWithManualLocation();
+    const list = await request(app).get('/api/earthquakes?pageSize=50');
+    const id = list.body.items.find((i: { externalId: string }) => i.externalId === 'co-1').id;
+    const res = await request(app).get(`/api/earthquakes/${id}`).set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.earthquake.distanceKm).toBeGreaterThan(0);
   });
 });
 

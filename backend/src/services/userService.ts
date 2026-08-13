@@ -23,7 +23,13 @@ export interface PublicUserSource {
   active?: boolean;
   phone?: string | null;
   location?: { latitude?: number | null; longitude?: number | null; accuracy?: number | null; updatedAt?: Date | null } | null;
-  locationManual?: { country?: string; department?: string; municipality?: string } | null;
+  locationManual?: {
+    country?: string;
+    department?: string;
+    municipality?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+  } | null;
   alertSettings?: Partial<AlertSettings>;
   pushEnabled?: boolean;
   createdAt?: Date;
@@ -57,6 +63,10 @@ export function toPublicUser(doc: PublicUserSource): PublicUser {
           country: doc.locationManual.country ?? 'Colombia',
           department: doc.locationManual.department ?? '',
           municipality: doc.locationManual.municipality ?? '',
+          latitude:
+            typeof doc.locationManual.latitude === 'number' ? doc.locationManual.latitude : null,
+          longitude:
+            typeof doc.locationManual.longitude === 'number' ? doc.locationManual.longitude : null,
         }
       : null,
     alertSettings: { ...DEFAULT_ALERT_SETTINGS, ...(doc.alertSettings ?? {}) },

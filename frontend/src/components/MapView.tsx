@@ -21,7 +21,17 @@ interface MapViewProps {
   selectedId?: string | null;
 }
 
-/** Mapa Leaflet + OpenStreetMap con navegación libre, epicentros y marcador de usuario. */
+const OSM_TILES = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+const SEVERITY_COLORS: Record<string, string> = {
+  low: '#34d399',
+  moderate: '#f59e0b',
+  strong: '#f97316',
+  very_strong: '#ef4444',
+};
+
+/** Mapa Leaflet con basemap clásico de OpenStreetMap y navegación libre. */
 export default function MapView({
   events,
   userLocation,
@@ -34,6 +44,7 @@ export default function MapView({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
   const userMarkerRef = useRef<L.CircleMarker | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -45,9 +56,9 @@ export default function MapView({
       worldCopyJump: true,
       attributionControl: true,
     });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    tileLayerRef.current = L.tileLayer(OSM_TILES, {
       maxZoom: 18,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution: OSM_ATTRIBUTION,
     }).addTo(map);
     layerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
@@ -56,6 +67,7 @@ export default function MapView({
       map.remove();
       mapRef.current = null;
       layerRef.current = null;
+      tileLayerRef.current = null;
     };
   }, []);
 
@@ -69,19 +81,19 @@ export default function MapView({
       const size = Math.max(7, Math.min(20, 5 + ev.magnitude * 1.8));
       const marker = L.circleMarker([ev.latitude, ev.longitude], {
         radius: size,
-        color: selectedId === ev.id ? '#ffffff' : '#0b1526',
+        color: selectedId === ev.id ? '#ffffff' : 'rgba(11, 21, 38, 0.8)',
         weight: selectedId === ev.id ? 3 : 1.5,
-        fillColor: severity.level === 'very_strong' ? '#ef4444' : severity.level === 'strong' ? '#f97316' : severity.level === 'moderate' ? '#f59e0b' : '#34d399',
+        fillColor: SEVERITY_COLORS[severity.level] ?? '#34d399',
         fillOpacity: 0.85,
       });
       const popupHtml = `
         <div style="min-width:200px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
             <span style="font-size:20px;font-weight:800">M${formatMagnitude(ev.magnitude)}</span>
-            <span style="font-size:11px;color:#94a3b8">${severity.shortLabel}</span>
+            <span style="font-size:11px;opacity:.7">${severity.shortLabel}</span>
           </div>
           <div style="font-size:13px;line-height:1.4">${ev.place}</div>
-          <div style="font-size:11px;color:#94a3b8;margin-top:4px">
+          <div style="font-size:11px;opacity:.6;margin-top:4px">
             ${formatRelativeTime(ev.eventTime)} · ${depthCategory(ev.depth).shortLabel.toLowerCase()} · ${ev.source.toUpperCase()}
           </div>
         </div>`;
@@ -145,24 +157,24 @@ export default function MapView({
   };
 
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl border border-white/5">
+    <div className="relative w-full overflow-hidden rounded-2xl border border-line">
       <div ref={containerRef} style={{ height }} className="w-full" aria-label="Mapa de eventos sísmicos" />
       <div className="absolute right-3 top-3 z-[1000] flex flex-col gap-2">
         <button
           type="button"
           onClick={focusColombia}
-          className="rounded-lg border border-white/10 bg-seismic-800/90 px-3 py-1.5 text-xs font-medium text-slate-200 shadow-lg backdrop-blur hover:bg-seismic-700"
+          className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-body shadow-sm hover:bg-surface-2"
           title="Centrar en Colombia"
         >
-          🇨🇴 Colombia
+          Colombia
         </button>
         <button
           type="button"
           onClick={focusWorld}
-          className="rounded-lg border border-white/10 bg-seismic-800/90 px-3 py-1.5 text-xs font-medium text-slate-200 shadow-lg backdrop-blur hover:bg-seismic-700"
+          className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-body shadow-sm hover:bg-surface-2"
           title="Ver todos los eventos en el mundo"
         >
-          🌎 Mundo
+          Mundo
         </button>
       </div>
     </div>

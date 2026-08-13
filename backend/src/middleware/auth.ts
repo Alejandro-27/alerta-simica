@@ -42,3 +42,30 @@ export function requireAdmin(req: AuthRequest, _res: Response, next: NextFunctio
   }
   next();
 }
+
+/**
+ * Igual que requireAuth pero NO falla si no hay token (o es inválido):
+ * simplemente continúa sin req.user. Útil para endpoints públicos que
+ * mejoran su respuesta cuando hay sesión (p. ej. distancias).
+ */
+export async function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction) {
+  try {
+    const header = req.headers.authorization;
+    if (!header?.startsWith('Bearer ')) return next();
+    const token = header.slice(7);
+    let decoded: jwt.JwtPayload;
+    try {
+      decoded = jwt.verify(token, env.jwtAccessSecret) as jwt.JwtPayload;
+    } catch {
+      return next();
+    }
+    if (!decoded.sub || !mongoose.isValidObjectId(decoded.sub)) return next();
+    const user = await User.findById(decoded.sub).lean();
+    if (!user || !user.active) return next();
+    if (user.tokenVersion !== decoded.tv) return next();
+    req.user = { id: String(user._id), role: user.role as 'ADMIN' | 'USER' };
+  } catch {
+    // Cualquier error: seguir como anónimo.
+  }
+  next();
+}

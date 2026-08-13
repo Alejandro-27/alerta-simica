@@ -32,7 +32,7 @@ export default function EarthquakeDetail() {
 
   if (loading) {
     return (
-      <div className="mx-auto flex max-w-4xl items-center gap-2 px-4 py-20 text-slate-400">
+      <div className="mx-auto flex max-w-4xl items-center gap-2 px-4 py-20 text-body-muted">
         <Spinner /> Cargando evento…
       </div>
     );
@@ -53,27 +53,27 @@ export default function EarthquakeDetail() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link to="/earthquakes" className="text-sm text-slate-400 hover:text-white">← Historial</Link>
+        <Link to="/earthquakes" className="text-sm text-body-muted hover:text-body">← Historial</Link>
         {event.demo && (
-          <span className="badge border-purple-500/30 bg-purple-500/15 text-purple-300">DATOS DE DEMOSTRACIÓN</span>
+          <span className="badge border-sev-moderate/30 bg-sev-moderate/10 text-sev-moderate">DATOS DE DEMOSTRACIÓN</span>
         )}
       </div>
 
       <header className="card overflow-hidden">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
           <span className={`inline-flex items-center gap-3 rounded-2xl border px-6 py-5 ${severity.color}`}>
-            <span className="text-6xl font-black leading-none">{formatMagnitude(event.magnitude)}</span>
+            <span className="text-6xl font-black leading-none tabular-nums">{formatMagnitude(event.magnitude)}</span>
             <span className="text-lg font-bold">{severity.shortLabel}</span>
           </span>
           <div className="flex-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Magnitud en la escala de Richter</p>
-            <h1 className="mt-1 text-2xl font-extrabold text-white sm:text-3xl">{event.place}</h1>
-            <p className="mt-2 text-sm text-slate-300">{severity.description}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-body-faint">Magnitud en la escala de Richter</p>
+            <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-body sm:text-3xl">{event.place}</h1>
+            <p className="mt-2 text-sm text-body-muted">{severity.description}</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="badge border-white/5 bg-white/5 text-slate-300">{formatRelativeTime(event.eventTime)}</span>
-              <span className="badge border-white/5 bg-white/5 text-slate-300">{depth.label}</span>
-              <span className="badge border-white/5 bg-white/5 text-slate-300">Fuente: {sourceLabels[event.source] ?? event.source}</span>
-              {event.tsunami && <span className="badge border-red-500/30 bg-red-500/15 text-red-300">Alerta de tsunami</span>}
+              <span className="badge border-line bg-surface-3 text-body-muted">{formatRelativeTime(event.eventTime)}</span>
+              <span className="badge border-line bg-surface-3 text-body-muted">{depth.label}</span>
+              <span className="badge border-line bg-surface-3 text-body-muted">Fuente: {sourceLabels[event.source] ?? event.source}</span>
+              {event.tsunami && <span className="badge border-sev-critical/30 bg-sev-critical/10 text-sev-critical">Alerta de tsunami</span>}
             </div>
           </div>
         </div>
@@ -82,35 +82,35 @@ export default function EarthquakeDetail() {
       {/* Datos simples */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="card !p-5">
-          <p className="text-xs font-medium text-slate-400">Profundidad</p>
-          <p className="mt-1 text-xl font-bold text-slate-100">{Math.round(event.depth)} km</p>
-          <p className="mt-0.5 text-xs text-slate-500">{depth.shortLabel}</p>
+          <p className="text-xs font-medium text-body-muted">Profundidad</p>
+          <p className="mt-1 text-xl font-bold tabular-nums text-body">{Math.round(event.depth)} km</p>
+          <p className="mt-0.5 text-xs text-body-faint">{depth.shortLabel}</p>
         </div>
         <div className="card !p-5">
-          <p className="text-xs font-medium text-slate-400">Hora local</p>
-          <p className="mt-1 text-xl font-bold text-slate-100">{formatDate(event.eventTime)}</p>
+          <p className="text-xs font-medium text-body-muted">Hora local</p>
+          <p className="mt-1 text-xl font-bold text-body">{formatDate(event.eventTime)}</p>
         </div>
         <div className="card !p-5">
-          <p className="text-xs font-medium text-slate-400">Coordenadas</p>
-          <p className="mt-1 text-xl font-bold text-slate-100">
+          <p className="text-xs font-medium text-body-muted">Coordenadas</p>
+          <p className="mt-1 text-xl font-bold tabular-nums text-body">
             {event.latitude.toFixed(2)}°, {event.longitude.toFixed(2)}°
           </p>
         </div>
         <div className="card !p-5">
-          <p className="text-xs font-medium text-slate-400">Distancia a ti</p>
+          <p className="text-xs font-medium text-body-muted">Distancia a ti</p>
           {event.distanceKm !== null && event.distanceKm !== undefined ? (
             <>
-              <p className="mt-1 text-xl font-bold text-accent">{formatDistanceKm(event.distanceKm)}</p>
-              <p className="mt-0.5 text-xs text-slate-500">desde tu ubicación registrada</p>
+              <p className="mt-1 text-xl font-bold tabular-nums text-accent">{formatDistanceKm(event.distanceKm)}</p>
+              <p className="mt-0.5 text-xs text-body-faint">desde tu ubicación registrada</p>
             </>
           ) : (
-            <p className="mt-1 text-xl font-bold text-slate-100">—</p>
+            <p className="mt-1 text-xl font-bold text-body">—</p>
           )}
         </div>
       </div>
 
       <div className="card">
-        <h2 className="mb-3 text-lg font-bold text-slate-100">Epicentro en el mapa</h2>
+        <h2 className="mb-3 text-lg font-bold text-body">Epicentro en el mapa</h2>
         <MapView events={[event]} height="360px" showRadii={Boolean(event.distanceKm !== null)} radiusKm={event.distanceKm ?? 100} selectedId={event.id} />
       </div>
 
@@ -128,16 +128,16 @@ export default function EarthquakeDetail() {
         <button
           type="button"
           onClick={() => setShowTechnical((s) => !s)}
-          className="flex w-full items-center justify-between px-5 py-3.5 text-left text-sm font-medium text-slate-300 hover:text-white"
+          className="flex w-full items-center justify-between px-5 py-3.5 text-left text-sm font-medium text-body hover:text-body-muted"
           aria-expanded={showTechnical}
         >
           Detalles técnicos para expertos
-          <svg className={`h-4 w-4 transition-transform ${showTechnical ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <svg className={`h-4 w-4 transition-transform text-body-muted ${showTechnical ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
           </svg>
         </button>
         {showTechnical && (
-          <dl className="grid grid-cols-1 gap-x-4 gap-y-3 border-t border-white/5 px-5 py-4 text-sm sm:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-x-4 gap-y-3 border-t border-line px-5 py-4 text-sm sm:grid-cols-2">
             {[
               { label: 'Tipo de magnitud', value: event.magnitudeType || 'N/D' },
               { label: 'Estado del reporte', value: event.status },
@@ -148,16 +148,16 @@ export default function EarthquakeDetail() {
               { label: 'ID de referencia', value: event.externalId },
               { label: 'Datos crudos en archivo', value: event.hasRawData ? 'Sí' : 'No' },
             ].map((s) => (
-              <div key={s.label} className="flex justify-between gap-3 border-b border-white/5 pb-2 last:border-0">
-                <dt className="text-slate-500">{s.label}</dt>
-                <dd className="text-right font-medium text-slate-200">{s.value}</dd>
+              <div key={s.label} className="flex justify-between gap-3 border-b border-line pb-2 last:border-0">
+                <dt className="text-body-faint">{s.label}</dt>
+                <dd className="text-right font-medium text-body">{s.value}</dd>
               </div>
             ))}
           </dl>
         )}
       </div>
 
-      <p className="text-xs leading-relaxed text-slate-500">
+      <p className="text-xs leading-relaxed text-body-faint">
         Este evento fue reportado por {sourceLabels[event.source] ?? event.source}. Los datos científicos oficiales no se modifican; la información cruda queda guardada para auditoría.
       </p>
     </div>

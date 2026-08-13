@@ -52,8 +52,8 @@ export default function SettingsProfile() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-extrabold text-white">Mi perfil</h1>
-      <p className="mt-1 text-sm text-slate-400">Datos de tu cuenta en AlertaSísmica.</p>
+      <h1 className="text-2xl font-extrabold tracking-tight text-body">Mi perfil</h1>
+      <p className="mt-1 text-sm text-body-muted">Datos de tu cuenta en AlertaSísmica.</p>
 
       <form className="card mt-6 space-y-4" onSubmit={submit}>
         <div className="grid grid-cols-2 gap-3">
@@ -69,7 +69,7 @@ export default function SettingsProfile() {
         <div>
           <label htmlFor="email" className="label">Correo electrónico</label>
           <input id="email" type="email" disabled className="input opacity-60" value={user?.email ?? ''} aria-describedby="email-note" />
-          <p id="email-note" className="mt-1 text-xs text-slate-500">El correo no se puede cambiar desde aquí.</p>
+          <p id="email-note" className="mt-1 text-xs text-body-faint">El correo no se puede cambiar desde aquí.</p>
         </div>
         <div>
           <label htmlFor="phone" className="label">Teléfono (opcional)</label>
@@ -79,16 +79,16 @@ export default function SettingsProfile() {
           <label htmlFor="password" className="label">Nueva contraseña (opcional)</label>
           <input id="password" type="password" minLength={8} autoComplete="new-password" className="input" placeholder="Déjalo vacío para no cambiarla" value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} />
         </div>
-        {error && <p className="text-sm text-red-400" role="alert">{error}</p>}
-        {message && <p className="text-sm text-green-400" role="status">{message}</p>}
+        {error && <p className="text-sm text-sev-critical" role="alert">{error}</p>}
+        {message && <p className="text-sm text-sev-low" role="status">{message}</p>}
         <button type="submit" disabled={busy} className="btn-primary">
           {busy && <Spinner />} Guardar cambios
         </button>
       </form>
 
-      <div className="card mt-6 border-red-800/40">
-        <h2 className="font-bold text-red-300">Zona de peligro</h2>
-        <p className="mt-1 text-sm text-slate-400">
+      <div className="card mt-6 border-sev-critical/40">
+        <h2 className="font-bold text-sev-critical">Zona de peligro</h2>
+        <p className="mt-1 text-sm text-body-muted">
           Eliminar tu cuenta borra tu perfil, tu ubicación y tus suscripciones de notificación. Esta acción no se puede deshacer.
         </p>
         {!confirmingDelete ? (

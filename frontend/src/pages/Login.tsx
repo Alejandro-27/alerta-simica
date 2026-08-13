@@ -32,8 +32,8 @@ export default function Login() {
   return (
     <RedirectIfAuthed>
       <div className="mx-auto max-w-md px-4 py-16">
-        <h1 className="text-2xl font-extrabold text-white">Iniciar sesión</h1>
-        <p className="mt-1 text-sm text-slate-400">Accede para configurar tus alertas y recibir notificaciones.</p>
+        <h1 className="text-2xl font-extrabold tracking-tight text-body">Iniciar sesión</h1>
+        <p className="mt-1 text-sm text-body-muted">Accede para configurar tus alertas y recibir notificaciones.</p>
         <form className="card mt-6 space-y-4" onSubmit={submit}>
           <div>
             <label htmlFor="email" className="label">Correo electrónico</label>
@@ -60,17 +60,17 @@ export default function Login() {
             />
           </div>
           {error && (
-            <p className="text-sm text-red-400" role="alert">{error}</p>
+            <p className="text-sm text-sev-critical" role="alert">{error}</p>
           )}
           <button type="submit" disabled={busy} className="btn-primary w-full">
             {busy && <Spinner />} Entrar
           </button>
         </form>
-        <div className="mt-4 flex flex-col gap-2 text-sm text-slate-400 sm:flex-row sm:justify-between">
-          <Link to="/forgot-password" className="text-amber-400 hover:underline">¿Olvidaste tu contraseña?</Link>
+        <div className="mt-4 flex flex-col gap-2 text-sm text-body-muted sm:flex-row sm:justify-between">
+          <Link to="/forgot-password" className="text-accent hover:underline">¿Olvidaste tu contraseña?</Link>
           <span>
             ¿No tienes cuenta?{' '}
-            <Link to="/register" className="font-medium text-amber-400 hover:underline">Regístrate</Link>
+            <Link to="/register" className="font-medium text-accent hover:underline">Regístrate</Link>
           </span>
         </div>
       </div>

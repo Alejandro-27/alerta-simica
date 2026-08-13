@@ -2,9 +2,41 @@ import { Request, Response } from 'express';
 import { Earthquake } from '../models/Earthquake';
 import { earthquakeListQuerySchema } from '../validators/validators';
 import { ApiError } from '../utils/errors';
-import { calculateDistanceKm, COLOMBIA_BBOX, findDepartmentBBox } from '../../../shared/src';
+import { calculateDistanceKm, COLOMBIA_BBOX, findDepartmentBBox, resolveColombiaLocation } from '../../../shared/src';
 import { backfillHistoricalRange } from '../services/earthquakeService';
 import { env } from '../config/env';
+import { User } from '../models/User';
+import type { AuthRequest } from '../middleware/auth';
+
+/**
+ * Ubicación de referencia del usuario para calcular distancias:
+ * prioriza el GPS (location); si no, la ubicación manual resuelta a
+ * coordenadas (o resuelta al vuelo si fue guardada sin ellas).
+ * Devuelve null para visitantes anónimos o sin ubicación.
+ */
+async function getUserLocation(req: AuthRequest): Promise<{ latitude: number; longitude: number } | null> {
+  if (!req.user) return null;
+  const user = await User.findById(req.user.id).lean();
+  if (!user) return null;
+  const loc = user.location as { latitude?: number; longitude?: number } | null;
+  if (typeof loc?.latitude === 'number' && typeof loc.longitude === 'number') {
+    return { latitude: loc.latitude, longitude: loc.longitude };
+  }
+  const manual = user.locationManual as {
+    latitude?: number | null;
+    longitude?: number | null;
+    department?: string | null;
+    municipality?: string | null;
+  } | null;
+  if (typeof manual?.latitude === 'number' && typeof manual.longitude === 'number') {
+    return { latitude: manual.latitude, longitude: manual.longitude };
+  }
+  if (manual?.department) {
+    const resolved = resolveColombiaLocation(manual.department, manual.municipality ?? '');
+    if (resolved) return resolved;
+  }
+  return null;
+}
 
 const SOURCE_LABELS: Record<string, string> = {
   sgc: 'Servicio Geológico Colombiano (SGC)',
@@ -12,7 +44,7 @@ const SOURCE_LABELS: Record<string, string> = {
   mock: 'Fuente simulada (DEMO)',
 };
 
-function serialize(doc: Record<string, unknown>, userLocation?: { latitude: number; longitude: number }) {
+function serialize(doc: Record<string, unknown>, userLocation?: { latitude: number; longitude: number } | null) {
   const d = doc as {
     _id: { toString(): string };
     externalId: string;
@@ -75,9 +107,10 @@ function mapDisplayLevel(alertLevel: string | null): 'NORMAL' | 'WARNING' | 'HIG
   return null;
 }
 
-export async function listEarthquakes(req: Request, res: Response) {
+export async function listEarthquakes(req: AuthRequest, res: Response) {
   const q = earthquakeListQuerySchema.parse(req.query);
   const filter: Record<string, any> = {};
+  const userLocation = await getUserLocation(req);
 
   // Rango histórico no cubierto: descargar on-demand del USGS (no genera alertas).
   if (q.from && !env.isTest) {
@@ -136,7 +169,7 @@ export async function listEarthquakes(req: Request, res: Response) {
   ]);
 
   res.json({
-    items: items.map((d) => serialize(d as unknown as Record<string, unknown>)),
+    items: items.map((d) => serialize(d as unknown as Record<string, unknown>, userLocation)),
     total,
     page: q.page,
     pageSize: q.pageSize,
@@ -144,17 +177,19 @@ export async function listEarthquakes(req: Request, res: Response) {
   });
 }
 
-export async function getEarthquake(req: Request, res: Response) {
+export async function getEarthquake(req: AuthRequest, res: Response) {
   const { id } = req.params;
   const doc = await Earthquake.findById(id).lean();
   if (!doc) throw ApiError.notFound('Evento sísmico no encontrado');
-  res.json({ earthquake: serialize(doc as unknown as Record<string, unknown>) });
+  const userLocation = await getUserLocation(req);
+  res.json({ earthquake: serialize(doc as unknown as Record<string, unknown>, userLocation) });
 }
 
-export async function recentEarthquakes(req: Request, res: Response) {
+export async function recentEarthquakes(req: AuthRequest, res: Response) {
   const hours = Math.min(parseInt(String(req.query.hours ?? '48'), 10) || 48, 168);
   const since = new Date(Date.now() - hours * 3600_000);
   const scope = req.query.scope === 'world' ? 'world' : 'co';
+  const userLocation = await getUserLocation(req);
   const filter: Record<string, any> = {
     eventTime: { $gte: since },
     demo: { $ne: true },
@@ -164,5 +199,9 @@ export async function recentEarthquakes(req: Request, res: Response) {
     filter.longitude = { $gte: COLOMBIA_BBOX.minLongitude, $lte: COLOMBIA_BBOX.maxLongitude };
   }
   const items = await Earthquake.find(filter).sort({ eventTime: -1 }).limit(50).lean();
-  res.json({ items: items.map((d) => serialize(d as unknown as Record<string, unknown>)), hours, scope });
+  res.json({
+    items: items.map((d) => serialize(d as unknown as Record<string, unknown>, userLocation)),
+    hours,
+    scope,
+  });
 }

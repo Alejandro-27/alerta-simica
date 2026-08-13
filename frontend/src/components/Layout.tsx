@@ -9,7 +9,7 @@ function Logo({ small = false }: { small?: boolean }) {
   return (
     <Link to="/" className="flex items-center gap-2.5" aria-label="AlertaSísmica — inicio">
       <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface-2">
-        <svg viewBox="0 0 64 64" className="h-5.5 w-5.5" aria-hidden="true">
+        <svg viewBox="0 0 64 64" className="h-6 w-6" aria-hidden="true">
           <circle cx="32" cy="32" r="7" fill="rgb(var(--color-accent))" />
           <circle cx="32" cy="32" r="15" fill="none" stroke="rgb(var(--color-line))" strokeWidth="4" />
           <circle cx="32" cy="32" r="24" fill="none" stroke="rgb(var(--color-line-strong))" strokeWidth="4" />
@@ -27,20 +27,11 @@ function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
   const toggle = () => {
-    if (theme === 'system') {
-      setTheme('light');
-    } else if (theme === 'light') {
-      setTheme('dark');
-    } else {
-      setTheme('system');
-    }
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
-  const iconLabel = {
-    system: 'Modo automático',
-    light: 'Cambiar a modo oscuro',
-    dark: 'Cambiar a modo claro',
-  }[theme];
+  const isDark = theme === 'dark';
+  const iconLabel = isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
 
   return (
     <button
@@ -48,10 +39,10 @@ function ThemeToggle() {
       onClick={toggle}
       title={iconLabel}
       aria-label={iconLabel}
-      className="rounded-lg p-2 text-body-muted transition-colors hover:bg-surface-2 hover:text-body"
+      className="flex items-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-xs font-medium text-body transition-colors hover:border-line-strong hover:bg-surface-3"
     >
-      {theme === 'dark' ? (
-        <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {isDark ? (
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="5" />
           <line x1="12" y1="1" x2="12" y2="3" />
           <line x1="12" y1="21" x2="12" y2="23" />
@@ -63,10 +54,11 @@ function ThemeToggle() {
           <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
         </svg>
       ) : (
-        <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
         </svg>
       )}
+      <span>{isDark ? 'Claro' : 'Oscuro'}</span>
     </button>
   );
 }
@@ -121,7 +113,7 @@ export default function Layout() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="site-header">
-        <div className="mx-auto flex h-15 max-w-6xl items-center justify-between gap-4 px-4">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
           <Logo />
           <div className="hidden items-center gap-5 md:flex">
             <MonitoringStatus />

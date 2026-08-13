@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "seed": "tsx src/seed/seed.ts",
+    "backfill:manual-coords": "tsx scripts/backfill-manual-coords.ts",
     "vapid:generate": "node scripts/generate-vapid-keys.js"
   },
   "dependencies": {

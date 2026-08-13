@@ -4,13 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sin conexión — AlertaSísmica</title>
-    <meta name="theme-color" content="#0b1220" />
+    <meta name="theme-color" content="#0d9488" />
     <style>
+      :root {
+        color-scheme: light dark;
+      }
       body {
         margin: 0;
-        background: #0b1220;
-        color: #e2e8f0;
-        font-family: system-ui, sans-serif;
+        background: #fafafa;
+        color: #1c1c20;
+        font-family: system-ui, -apple-system, sans-serif;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -24,16 +27,16 @@
       h1 {
         font-size: 1.5rem;
         margin: 0 0 8px;
-        color: #f59e0b;
+        color: #0d9488;
       }
       p {
-        color: #94a3b8;
+        color: #646474;
         line-height: 1.6;
       }
       button {
         margin-top: 16px;
-        background: #f59e0b;
-        color: #0b1220;
+        background: #0d9488;
+        color: #ffffff;
         border: 0;
         border-radius: 8px;
         padding: 12px 24px;
@@ -43,7 +46,19 @@
       .note {
         font-size: 0.85rem;
         margin-top: 24px;
-        color: #64748b;
+        color: #8c8c9c;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #101820;
+          color: #f0f2f5;
+        }
+        p {
+          color: #a0a8bc;
+        }
+        .note {
+          color: #70788c;
+        }
       }
     </style>
   </head>

@@ -17,8 +17,8 @@ export default function AdminLayout() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-white">Administración</h1>
-          <p className="text-sm text-slate-400">Sesión: {user?.email} (ADMIN)</p>
+          <h1 className="text-2xl font-extrabold tracking-tight text-body">Administración</h1>
+          <p className="text-sm text-body-muted">Sesión: {user?.email} (ADMIN)</p>
         </div>
         <NavLink to="/dashboard" className="btn-secondary !py-1.5 text-xs">← Mi panel</NavLink>
       </div>
@@ -30,7 +30,7 @@ export default function AdminLayout() {
             end={s.end}
             className={({ isActive }) =>
               `rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                isActive ? 'bg-amber-500 text-seismic-900' : 'bg-seismic-800 text-slate-300 hover:text-white'
+                isActive ? 'bg-accent text-white' : 'bg-surface-2 text-body-muted hover:text-body'
               }`
             }
           >

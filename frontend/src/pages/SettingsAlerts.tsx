@@ -44,14 +44,14 @@ export default function SettingsAlerts() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-extrabold text-white">Mis alertas</h1>
-      <p className="mt-1 text-sm text-slate-400">
+      <h1 className="text-2xl font-extrabold tracking-tight text-body">Mis alertas</h1>
+      <p className="mt-1 text-sm text-body-muted">
         Configura qué eventos te interesan y hasta dónde se considera «cerca de ti».
       </p>
 
       <div className="card mt-6">
-        <h2 className="font-bold text-slate-100">Notificaciones push</h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <h2 className="font-bold text-body">Notificaciones push</h2>
+        <p className="mt-1 text-sm text-body-muted">
           Activa las alertas para recibir notificaciones en este dispositivo.
         </p>
         <ActivateAlerts className="mt-3" />
@@ -60,15 +60,15 @@ export default function SettingsAlerts() {
       <form className="card mt-6 space-y-5" onSubmit={save}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <label htmlFor="enabled" className="font-semibold text-slate-100">Activar alertas</label>
-            <p className="text-xs text-slate-400">Permite evaluar eventos sísmicos para tu cuenta.</p>
+            <label htmlFor="enabled" className="font-semibold text-body">Activar alertas</label>
+            <p className="text-xs text-body-muted">Permite evaluar eventos sísmicos para tu cuenta.</p>
           </div>
           <input
             id="enabled"
             type="checkbox"
             checked={settings.enabled}
             onChange={(e) => update({ enabled: e.target.checked })}
-            className="h-5 w-5 accent-amber-500"
+            className="h-5 w-5 accent-[rgb(var(--color-accent))]"
           />
         </div>
 
@@ -84,12 +84,12 @@ export default function SettingsAlerts() {
                 step="0.5"
                 value={settings.minimumMagnitude}
                 onChange={(e) => update({ minimumMagnitude: parseFloat(e.target.value) })}
-                className="w-full accent-amber-500"
+                className="w-full accent-[rgb(var(--color-accent))]"
                 aria-valuetext={`${settings.minimumMagnitude}`}
               />
-              <span className="w-12 text-right font-bold text-amber-400">{settings.minimumMagnitude}</span>
+              <span className="w-12 text-right font-bold tabular-nums text-accent">{settings.minimumMagnitude}</span>
             </div>
-            <p className="text-xs text-slate-500">Eventos por debajo de esta magnitud no generan alertas.</p>
+            <p className="text-xs text-body-faint">Eventos por debajo de esta magnitud no generan alertas.</p>
           </div>
           <div>
             <label htmlFor="radius" className="label">Radio de alerta</label>
@@ -102,12 +102,12 @@ export default function SettingsAlerts() {
                 step="25"
                 value={settings.alertRadiusKm}
                 onChange={(e) => update({ alertRadiusKm: parseInt(e.target.value, 10) })}
-                className="w-full accent-amber-500"
+                className="w-full accent-[rgb(var(--color-accent))]"
                 aria-valuetext={`${settings.alertRadiusKm} km`}
               />
-              <span className="w-16 text-right font-bold text-amber-400">{settings.alertRadiusKm} km</span>
+              <span className="w-16 text-right font-bold tabular-nums text-accent">{settings.alertRadiusKm} km</span>
             </div>
-            <p className="text-xs text-slate-500">Distancia máxima para considerar un evento «cercano».</p>
+            <p className="text-xs text-body-faint">Distancia máxima para considerar un evento «cercano».</p>
           </div>
         </div>
 
@@ -119,27 +119,27 @@ export default function SettingsAlerts() {
         ].map((o) => (
           <div key={o.id} className="flex items-start justify-between gap-3">
             <div>
-              <label htmlFor={o.id} className="font-semibold text-slate-100">{o.label}</label>
-              <p className="text-xs text-slate-400">{o.desc}</p>
+              <label htmlFor={o.id} className="font-semibold text-body">{o.label}</label>
+              <p className="text-xs text-body-muted">{o.desc}</p>
             </div>
             <input
               id={o.id}
               type="checkbox"
               checked={settings[o.key]}
               onChange={(e) => update({ [o.key]: e.target.checked })}
-              className="h-5 w-5 accent-amber-500"
+              className="h-5 w-5 accent-[rgb(var(--color-accent))]"
             />
           </div>
         ))}
 
-        {error && <p className="text-sm text-red-400" role="alert">{error}</p>}
-        {message && <p className="text-sm text-green-400" role="status">{message}</p>}
+        {error && <p className="text-sm text-sev-critical" role="alert">{error}</p>}
+        {message && <p className="text-sm text-sev-low" role="status">{message}</p>}
         <button type="submit" disabled={busy} className="btn-primary">
           {busy && <Spinner />} Guardar preferencias
         </button>
       </form>
 
-      <p className="mt-4 text-xs leading-relaxed text-slate-500">
+      <p className="mt-4 text-xs leading-relaxed text-body-faint">
         {DISCLAIMER_TEXT} El sonido, el modo silencio, el foco o «No molestar» de tu dispositivo pueden bloquear las notificaciones; no podemos ignorarlos.
       </p>
     </div>

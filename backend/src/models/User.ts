@@ -39,6 +39,8 @@ export const userSchema = new Schema(
       country: { type: String, default: 'Colombia' },
       department: { type: String, default: '' },
       municipality: { type: String, default: '' },
+      latitude: { type: Number, min: -90, max: 90, default: null },
+      longitude: { type: Number, min: -180, max: 180, default: null },
     },
     alertSettings: { type: alertSettingsSchema, default: () => ({}) },
     tokenVersion: { type: Number, default: 0 },

@@ -53,7 +53,8 @@ export default function SettingsLocation() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const hasLocation = Boolean(user?.location?.latitude);
+  const gpsSet = Boolean(user?.location?.latitude);
+  const manualSet = Boolean(user?.locationManual?.latitude && user?.locationManual?.longitude);
 
   const useMyLocation = async () => {
     setError(null);
@@ -83,7 +84,8 @@ export default function SettingsLocation() {
     try {
       await endpoints.updateManualLocation(manual);
       await refreshUser();
-      setMessage('Ubicación manual guardada.');
+      const place = manual.municipality || manual.department || 'tu ubicación';
+      setMessage(`Ubicación guardada. Las distancias se calculan desde ${place}.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo guardar.');
     } finally {
@@ -104,25 +106,30 @@ export default function SettingsLocation() {
     }
   };
 
+  const manualCoords =
+    user?.locationManual?.latitude != null && user?.locationManual?.longitude != null
+      ? `${user.locationManual.latitude.toFixed(3)}, ${user.locationManual.longitude.toFixed(3)}`
+      : null;
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-extrabold text-white">Mi ubicación</h1>
-      <p className="mt-1 text-sm text-slate-400">
-        Tu ubicación es <strong>opcional</strong> y se usa únicamente para calcular si un evento sísmico está cerca de ti. Solo se guarda la última ubicación.
+      <h1 className="text-2xl font-extrabold tracking-tight text-body">Mi ubicación</h1>
+      <p className="mt-1 text-sm text-body-muted">
+        Tu ubicación es <strong>opcional</strong> y se usa únicamente para calcular distancias y alertas cerca de ti. Solo se guarda la última ubicación.
       </p>
 
       <div className="card mt-6">
-        <h2 className="font-bold text-slate-100">Usar mi ubicación</h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <h2 className="font-bold text-body">Usar mi ubicación</h2>
+        <p className="mt-1 text-sm text-body-muted">
           El navegador te pedirá permiso. Si lo rechazas, puedes escribir tu municipio manualmente.
         </p>
         <button onClick={() => void useMyLocation()} disabled={busy || geo.loading} className="btn-primary mt-3">
           {(busy || geo.loading) && <Spinner />}
-          {hasLocation ? 'Actualizar mi ubicación' : 'Usar mi ubicación'}
+          {gpsSet ? 'Actualizar mi ubicación' : 'Usar mi ubicación'}
         </button>
-        {geo.loading && <p className="mt-2 text-sm text-slate-400">Obteniendo ubicación…</p>}
-        {hasLocation && (
-          <p className="mt-3 text-sm text-slate-300">
+        {geo.loading && <p className="mt-2 text-sm text-body-muted">Obteniendo ubicación…</p>}
+        {gpsSet && (
+          <p className="mt-3 text-sm text-body-muted">
             Ubicación guardada: {user!.location!.latitude.toFixed(4)}, {user!.location!.longitude.toFixed(4)}
             {user?.location?.accuracy ? ` · precisión ±${Math.round(user.location.accuracy)} m` : ''} ·{' '}
             {new Date(user!.location!.updatedAt).toLocaleString('es-CO')}
@@ -131,7 +138,10 @@ export default function SettingsLocation() {
       </div>
 
       <form className="card mt-6 space-y-4" onSubmit={saveManual}>
-        <h2 className="font-bold text-slate-100">Ingresar ubicación manualmente</h2>
+        <h2 className="font-bold text-body">Ingresar ubicación manualmente</h2>
+        <p className="-mt-2 text-xs text-body-muted">
+          Si tu municipio está en la lista, las distancias se calculan desde él; si no, desde el centro del departamento.
+        </p>
         <div>
           <label htmlFor="country" className="label">País</label>
           <input id="country" className="input" value={manual.country} onChange={(e) => setManual((m) => ({ ...m, country: e.target.value }))} />
@@ -166,13 +176,19 @@ export default function SettingsLocation() {
             ))}
           </datalist>
         </div>
-        {error && <p className="text-sm text-red-400" role="alert">{error}</p>}
-        {message && <p className="text-sm text-green-400" role="status">{message}</p>}
+        {manualSet && manualCoords && (
+          <p className="text-xs text-body-muted">
+            Coordenadas de referencia: {manualCoords}
+            {user?.locationManual?.municipality ? ` (${user.locationManual.municipality})` : ''}
+          </p>
+        )}
+        {error && <p className="text-sm text-sev-critical" role="alert">{error}</p>}
+        {message && <p className="text-sm text-sev-low" role="status">{message}</p>}
         <div className="flex flex-wrap gap-2">
           <button type="submit" disabled={busy} className="btn-primary">
             {busy && <Spinner />} Guardar ubicación
           </button>
-          {hasLocation && (
+          {(gpsSet || manualSet) && (
             <button type="button" className="btn-secondary" onClick={() => void removeLocation()}>
               Eliminar mi ubicación
             </button>
@@ -180,7 +196,7 @@ export default function SettingsLocation() {
         </div>
       </form>
 
-      <p className="mt-4 text-xs leading-relaxed text-slate-500">
+      <p className="mt-4 text-xs leading-relaxed text-body-faint">
         Tu ubicación se guarda cifrada en la base de datos y solo se usa para calcular distancias a eventos sísmicos. Puedes eliminarla cuando quieras.
       </p>
     </div>

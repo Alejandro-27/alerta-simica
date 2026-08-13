@@ -16,7 +16,7 @@ export default function ResetPassword() {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <div className="card">
-          <p className="text-sm text-red-400">Enlace inválido: falta el token de restablecimiento.</p>
+          <p className="text-sm text-sev-critical">Enlace inválido: falta el token de restablecimiento.</p>
           <Link to="/forgot-password" className="btn-secondary mt-4">Solicitar otro enlace</Link>
         </div>
       </div>
@@ -49,7 +49,7 @@ export default function ResetPassword() {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <div className="card">
-          <p className="text-sm text-green-300">Contraseña actualizada correctamente.</p>
+          <p className="text-sm text-sev-low">Contraseña actualizada correctamente.</p>
           <Link to="/login" className="btn-primary mt-4">Iniciar sesión</Link>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default function ResetPassword() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-16">
-      <h1 className="text-2xl font-extrabold text-white">Nueva contraseña</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight text-body">Nueva contraseña</h1>
       <form className="card mt-6 space-y-4" onSubmit={submit}>
         <div>
           <label htmlFor="password" className="label">Nueva contraseña (mínimo 8 caracteres)</label>
@@ -68,7 +68,7 @@ export default function ResetPassword() {
           <label htmlFor="confirm" className="label">Confirmar contraseña</label>
           <input id="confirm" type="password" required autoComplete="new-password" className="input" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
         </div>
-        {error && <p className="text-sm text-red-400" role="alert">{error}</p>}
+        {error && <p className="text-sm text-sev-critical" role="alert">{error}</p>}
         <button type="submit" disabled={busy} className="btn-primary w-full">
           {busy && <Spinner />} Guardar contraseña
         </button>

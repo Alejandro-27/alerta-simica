@@ -44,33 +44,33 @@ export default function ActivateAlerts({ className = '' }: { className?: string 
           {active ? 'Desactivar alertas' : 'Activar alertas'}
         </button>
         {needsIOSInstall && (
-          <Link to="/install" id="install-hint" className="text-sm text-amber-400 underline underline-offset-2">
+          <Link to="/install" id="install-hint" className="text-sm text-accent underline underline-offset-2">
             Para activar notificaciones en iOS, instala la aplicación primero →
           </Link>
         )}
       </div>
 
       {error && (
-        <p className="mt-2 max-w-md text-sm text-red-400" role="alert">
+        <p className="mt-2 max-w-md text-sm text-sev-critical" role="alert">
           {error}
         </p>
       )}
       {!caps.supported && (
-        <p className="mt-2 max-w-md text-sm text-slate-400">
+        <p className="mt-2 max-w-md text-sm text-body-muted">
           Tu navegador no soporta notificaciones push. Puedes consultar los eventos desde la aplicación.
         </p>
       )}
       {caps.supported && !caps.serverConfigured && (
-        <p className="mt-2 max-w-md text-sm text-slate-400">
+        <p className="mt-2 max-w-md text-sm text-body-muted">
           Las notificaciones se activarán cuando el administrador configure el servidor de push (VAPID).
         </p>
       )}
       {caps.permission === 'denied' && !caps.subscribed && (
-        <p className="mt-2 max-w-md text-sm text-slate-400">
+        <p className="mt-2 max-w-md text-sm text-body-muted">
           Permiso denegado en este dispositivo. Actívalo en los ajustes del navegador (icono de candado → Notificaciones).
         </p>
       )}
-      <p className="mt-2 max-w-md text-xs leading-relaxed text-slate-500">
+      <p className="mt-2 max-w-md text-xs leading-relaxed text-body-faint">
         Las notificaciones dependen de la conectividad, la configuración del dispositivo y el sistema operativo. El modo silencio, «No molestar» o el foco pueden bloquearlas.
       </p>
     </div>
