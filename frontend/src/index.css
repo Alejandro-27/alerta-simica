@@ -17,8 +17,8 @@
 
   /* Severity colors - light mode (darker text, softer backgrounds) */
   --color-sev-low: 5 150 105;        /* emerald-600 */
-  --color-sev-moderate: 217 119 6;   /* amber-600 */
-  --color-sev-strong: 234 88 12;     /* orange-600 */
+  --color-sev-moderate: 234 179 8;   /* yellow-500 */
+  --color-sev-strong: 249 115 22;    /* orange-500 */
   --color-sev-critical: 220 38 38;   /* red-600 */
 
   color-scheme: light;
@@ -39,8 +39,8 @@
 
   /* Severity colors - dark mode (lighter text) */
   --color-sev-low: 52 211 153;      /* emerald-400 */
-  --color-sev-moderate: 251 191 36; /* amber-400 */
-  --color-sev-strong: 249 115 22;   /* orange-400 */
+  --color-sev-moderate: 250 204 21; /* yellow-400 */
+  --color-sev-strong: 251 146 60;   /* orange-400 */
   --color-sev-critical: 248 113 113; /* red-400 */
 
   color-scheme: dark;
@@ -111,20 +111,28 @@ body {
   .site-header {
     @apply sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur-sm;
   }
+}
 
-  /* Severity badges */
-  .sev-low {
-    @apply border-sev-low/30 bg-sev-low/10 text-sev-low;
-  }
-  .sev-moderate {
-    @apply border-sev-moderate/30 bg-sev-moderate/10 text-sev-moderate;
-  }
-  .sev-strong {
-    @apply border-sev-strong/30 bg-sev-strong/10 text-sev-strong;
-  }
-  .sev-critical {
-    @apply border-sev-critical/30 bg-sev-critical/10 text-sev-critical;
-  }
+/* Severity badges — outside @layer to avoid Tailwind purge */
+.sev-low {
+  border-color: rgb(var(--color-sev-low) / 0.3);
+  background-color: rgb(var(--color-sev-low) / 0.1);
+  color: rgb(var(--color-sev-low));
+}
+.sev-moderate {
+  border-color: rgb(var(--color-sev-moderate) / 0.3);
+  background-color: rgb(var(--color-sev-moderate) / 0.1);
+  color: rgb(var(--color-sev-moderate));
+}
+.sev-strong {
+  border-color: rgb(var(--color-sev-strong) / 0.3);
+  background-color: rgb(var(--color-sev-strong) / 0.1);
+  color: rgb(var(--color-sev-strong));
+}
+.sev-critical {
+  border-color: rgb(var(--color-sev-critical) / 0.3);
+  background-color: rgb(var(--color-sev-critical) / 0.1);
+  color: rgb(var(--color-sev-critical));
 }
 
 /* Focus visible for accessibility */
