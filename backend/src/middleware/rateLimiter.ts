@@ -23,3 +23,11 @@ export const pushLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'RATE_LIMITED', message: 'Demasiadas peticiones' },
 });
+
+export const adminMutationLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'RATE_LIMITED', message: 'Demasiadas operaciones, intenta más tarde' },
+});

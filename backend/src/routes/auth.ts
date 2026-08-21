@@ -11,7 +11,7 @@ router.post('/login', authLimiter, asyncHandler(auth.login));
 router.post('/refresh', authLimiter, asyncHandler(auth.refresh));
 router.post('/forgot-password', authLimiter, asyncHandler(auth.forgotPassword));
 router.post('/reset-password', authLimiter, asyncHandler(auth.resetPasswordAction));
-router.post('/logout', requireAuth, asyncHandler(auth.logout));
+router.post('/logout', authLimiter, requireAuth, asyncHandler(auth.logout));
 router.get('/me', requireAuth, asyncHandler(auth.me));
 
 export default router;

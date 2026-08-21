@@ -10,9 +10,9 @@ export const earthquakeListQuerySchema = paginationSchema.extend({
   to: z.string().datetime().optional(),
   minMagnitude: z.coerce.number().min(-2).max(12).optional(),
   maxMagnitude: z.coerce.number().min(-2).max(12).optional(),
-  source: z.string().optional(),
-  department: z.string().optional(),
-  municipality: z.string().optional(),
+  source: z.enum(['sgc', 'usgs', 'mock']).optional(),
+  department: z.string().trim().max(80).optional(),
+  municipality: z.string().trim().max(80).optional(),
   maxDepth: z.coerce.number().min(0).optional(),
   minDepth: z.coerce.number().min(0).optional(),
   near: z
@@ -27,16 +27,19 @@ export const adminEarthquakeQuerySchema = earthquakeListQuerySchema.extend({
 });
 
 export const adminUsersQuerySchema = paginationSchema.extend({
-  q: z.string().optional(),
+  q: z.string().trim().max(200).optional(),
   role: z.enum(['ADMIN', 'USER']).optional(),
   active: z.enum(['true', 'false']).optional(),
-  sort: z.string().optional(),
+  sort: z.enum(['name', '-name', 'createdAt', '-createdAt']).optional(),
 });
 
 export const adminNotificationsQuerySchema = paginationSchema.extend({
   type: z.enum(['EARTHQUAKE_DETECTED', 'EARTHQUAKE_ALERT', 'SYSTEM_NOTIFICATION', 'TEST_NOTIFICATION']).optional(),
   delivered: z.enum(['true', 'false']).optional(),
-  userId: z.string().optional(),
+  userId: z
+    .string()
+    .regex(/^[a-f\d]{24}$/i, 'ObjectId inválido')
+    .optional(),
 });
 
 export const adminLogsQuerySchema = paginationSchema.extend({

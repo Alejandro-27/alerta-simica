@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -11,8 +12,34 @@ function required(name: string, defaultValue?: string): string {
   return value;
 }
 
+/**
+ * Secret JWT: en producción exige la env var; en dev/test genera uno
+ * aleatorio efímero (cambia en cada arranque) para evitar secretos predecibles.
+ */
+function jwtSecret(name: string, isTestMode: boolean): string {
+  const value = process.env[name];
+  if (value && value.length >= 32) return value;
+  if (isProd) {
+    throw new Error(`${name} debe estar definida y tener al menos 32 caracteres`);
+  }
+  if (!isTestMode) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[seguridad] ${name} no definida o muy corta; usando secreto aleatorio EFÍMERO ` +
+        '(las sesiones se invalidan al reiniciar). Define esta variable para entornos persistentes.',
+    );
+  }
+  return crypto.randomBytes(48).toString('hex');
+}
+
 const isProd = process.env.NODE_ENV === 'production';
 const isTest = process.env.NODE_ENV === 'test';
+
+// CORS: en producción se exige origen explícito; el comodín solo es aceptable en desarrollo.
+const corsOriginValue = process.env.CORS_ORIGIN ?? '';
+if (isProd && !corsOriginValue) {
+  throw new Error('CORS_ORIGIN es obligatoria en producción (usa la URL HTTPS de tu frontend)');
+}
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
@@ -20,10 +47,10 @@ export const env = {
   isTest,
   port: parseInt(process.env.PORT ?? '4000', 10),
   frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:5173',
-  corsOrigin: process.env.CORS_ORIGIN ?? '*',
+  corsOrigin: corsOriginValue || '*',
   mongodbUri: required('MONGODB_URI', isTest ? 'mongodb://localhost:27017/alertasimica_test' : ''),
-  jwtAccessSecret: required('JWT_ACCESS_SECRET', isProd ? '' : 'dev-access-secret'),
-  jwtRefreshSecret: required('JWT_REFRESH_SECRET', isProd ? '' : 'dev-refresh-secret'),
+  jwtAccessSecret: jwtSecret('JWT_ACCESS_SECRET', isTest),
+  jwtRefreshSecret: jwtSecret('JWT_REFRESH_SECRET', isTest),
   jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '30d',
   vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? '',

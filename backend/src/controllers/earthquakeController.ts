@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Earthquake } from '../models/Earthquake';
 import { earthquakeListQuerySchema } from '../validators/validators';
 import { ApiError } from '../utils/errors';
+import { escapeRegExp } from '../utils/regexp';
 import { calculateDistanceKm, COLOMBIA_BBOX, findDepartmentBBox, resolveColombiaLocation } from '../../../shared/src';
 import { backfillHistoricalRange } from '../services/earthquakeService';
 import { env } from '../config/env';
@@ -147,9 +148,9 @@ export async function listEarthquakes(req: AuthRequest, res: Response) {
     filter.latitude = { $gte: dept.bbox.minLatitude, $lte: dept.bbox.maxLatitude };
     filter.longitude = { $gte: dept.bbox.minLongitude, $lte: dept.bbox.maxLongitude };
   } else if (q.department) {
-    filter['place'] = { $regex: q.department, $options: 'i' };
+    filter['place'] = { $regex: escapeRegExp(q.department), $options: 'i' };
   }
-  if (q.municipality) filter['place'] = { $regex: q.municipality, $options: 'i' };
+  if (q.municipality) filter['place'] = { $regex: escapeRegExp(q.municipality), $options: 'i' };
 
   if ((q.scope ?? 'co') === 'co' && !dept) {
     filter.latitude = { $gte: COLOMBIA_BBOX.minLatitude, $lte: COLOMBIA_BBOX.maxLatitude };

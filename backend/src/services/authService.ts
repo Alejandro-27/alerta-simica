@@ -89,6 +89,10 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthToke
   if (!user.active) throw ApiError.forbidden('Tu cuenta está desactivada');
   if (user.tokenVersion !== decoded.tv) throw ApiError.unauthorized('Sesión revocada');
 
+  // Rotación: invalidar el refresh token usado emitiendo uno nuevo con tv+1.
+  // Un token robado deja de funcionar tras el primer uso legítimo.
+  user.tokenVersion += 1;
+  await user.save();
   return issueTokens(user);
 }
 

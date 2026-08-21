@@ -2,9 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 
 /**
  * Sanitización básica anti NoSQL-injection:
- * elimina operadores $ y claves con "." de query/body/params.
+ * elimina operadores $, claves con "." y claves de prototype pollution
+ * (__proto__, constructor, prototype) de query/body/params.
  * (Complementa la validación Zod por endpoint.)
  */
+const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 function sanitizeValue(value: unknown, key: string, parent: Record<string, unknown>): void {
   if (typeof value === 'object' && value !== null) {
     if (Array.isArray(value)) {
@@ -14,7 +17,7 @@ function sanitizeValue(value: unknown, key: string, parent: Record<string, unkno
       return;
     }
     for (const [k, v] of Object.entries(value)) {
-      if (k.startsWith('$') || k.includes('.')) {
+      if (k.startsWith('$') || k.includes('.') || DANGEROUS_KEYS.has(k)) {
         delete (value as Record<string, unknown>)[k];
         continue;
       }

@@ -3,8 +3,8 @@
  * Uso: npm run seed
  *
  * Crea:
- *  - 1 usuario administrador (admin@alertasimica.local / Admin123!)
- *  - 1 usuario normal (demo@alertasimica.local / Demo123!)
+ *  - 1 usuario administrador (admin@alertasimica.local)
+ *  - 1 usuario normal (demo@alertasimica.local)
  *  - ~15 terremotos históricos reales de Colombia marcados demo:true
  *
  * Los eventos demo NUNCA generan alertas y siempre se distinguen de los reales.
@@ -17,6 +17,11 @@ import { Earthquake } from '../models/Earthquake';
 import { AlertConfiguration } from '../models/AlertConfiguration';
 import { SourceStatus } from '../models/SourceStatus';
 import { logger } from '../utils/logger';
+
+if (env.isProd) {
+  logger.error('El seed de demostración no debe ejecutarse en producción.');
+  process.exit(1);
+}
 
 const DEMO_EARTHQUAKES = [
   // [fecha, mag, lat, lon, prof, lugar]
@@ -123,9 +128,7 @@ async function main() {
   }, 'Seed completado');
 
   logger.info('');
-  logger.info('Credenciales de demostración:');
-  logger.info('  Admin: admin@alertasimica.local / Admin123!');
-  logger.info('  Usuario: demo@alertasimica.local / Demo123!');
+  logger.info('Cuentas de demostración creadas (contraseñas conocidas solo por el operador del seed).');
   logger.info('Los terremotos demo están marcados demo:true y no generan alertas.');
 
   await mongoose.disconnect();

@@ -8,6 +8,7 @@ import {
   adminUserUpdateSchema,
   adminEarthquakeQuerySchema,
 } from '../validators/validators';
+import { escapeRegExp } from '../utils/regexp';
 import { User } from '../models/User';
 import { Earthquake } from '../models/Earthquake';
 import { Notification } from '../models/Notification';
@@ -82,10 +83,11 @@ export async function listUsers(req: Request<unknown, unknown, unknown, Record<s
   const q = adminUsersQuerySchema.parse(req.query);
   const filter: Record<string, any> = {};
   if (q.q) {
+    const escaped = escapeRegExp(q.q);
     filter.$or = [
-      { firstName: { $regex: q.q, $options: 'i' } },
-      { lastName: { $regex: q.q, $options: 'i' } },
-      { email: { $regex: q.q, $options: 'i' } },
+      { firstName: { $regex: escaped, $options: 'i' } },
+      { lastName: { $regex: escaped, $options: 'i' } },
+      { email: { $regex: escaped, $options: 'i' } },
     ];
   }
   if (q.role) filter.role = q.role;

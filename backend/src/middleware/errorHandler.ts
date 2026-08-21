@@ -27,10 +27,11 @@ export function errorHandler(
   // Errores de MongoDB (índices únicos, etc.)
   const mongoErr = err as { code?: number; message?: string; keyValue?: Record<string, unknown>; name?: string };
   if (mongoErr.code === 11000) {
+    // Solo nombres de campos, nunca los valores (no exponer datos internos).
     return res.status(409).json({
       error: 'DUPLICATE_KEY',
       message: 'El recurso ya existe',
-      details: mongoErr.keyValue,
+      details: mongoErr.keyValue ? { fields: Object.keys(mongoErr.keyValue) } : undefined,
     });
   }
   if ((err as { name?: string }).name === 'ValidationError' || (err as { name?: string }).name === 'CastError') {
