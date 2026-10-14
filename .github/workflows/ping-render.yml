@@ -1,0 +1,22 @@
+name: Ping Render Backend
+
+on:
+  schedule:
+    # Ejecuta cada 14 minutos
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Permite ejecutarlo manualmente desde GitHub
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Backend
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://alertasimica-backend.onrender.com/api)
+          echo "Response code: $RESPONSE"
+          if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 400 ]; then
+            echo "✅ Backend is awake"
+          else
+            echo "❌ Backend returned $RESPONSE"
+            exit 1
+          fi
