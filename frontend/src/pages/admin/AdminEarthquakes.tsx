@@ -67,7 +67,7 @@ export default function AdminEarthquakes() {
         <div className="flex items-center gap-2 text-body-muted"><Spinner /> Cargando…</div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-line bg-surface-2">
+          <div className="overflow-x-auto rounded-md border border-line bg-surface-2">
             <table className="w-full text-left text-sm">
               <thead className="bg-surface-3 text-xs uppercase text-body-faint">
                 <tr>
@@ -82,7 +82,7 @@ export default function AdminEarthquakes() {
               <tbody>
                 {items.map((e) => (
                   <tr key={e.id} className="border-t border-line">
-                    <td className="px-4 py-3 font-black tabular-nums text-accent">{e.magnitude.toFixed(1)}</td>
+                    <td className="px-4 py-3 font-bold tabular-nums text-accent">{e.magnitude.toFixed(1)}</td>
                     <td className="px-4 py-3 text-body">{e.place}</td>
                     <td className="px-4 py-3">
                       <span className="badge border-line bg-surface-3 text-body-muted">{e.source.toUpperCase()}</span>
@@ -91,7 +91,7 @@ export default function AdminEarthquakes() {
                     <td className="px-4 py-3 text-xs text-body-muted">{new Date(e.eventTime).toLocaleString('es-CO')}</td>
                     <td className="px-4 py-3 text-xs text-body-muted">{new Date(e.firstDetectedAt).toLocaleString('es-CO')}</td>
                     <td className="px-4 py-3">
-                      <button className="btn-danger !py-1 text-xs" onClick={() => void remove(e.id)}>Eliminar</button>
+                      <button className="btn-danger btn-xs" onClick={() => void remove(e.id)}>Eliminar</button>
                     </td>
                   </tr>
                 ))}

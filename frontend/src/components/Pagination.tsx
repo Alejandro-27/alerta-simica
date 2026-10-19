@@ -19,7 +19,7 @@ export default function Pagination({ page, totalPages, total, onChange }: Pagina
         {total} resultado{total === 1 ? '' : 's'} · página {page} de {totalPages}
       </p>
       <div className="flex items-center gap-1">
-        <button className="btn-secondary !px-2.5 !py-1.5 text-xs" onClick={() => onChange(page - 1)} disabled={page <= 1} aria-label="Página anterior">
+        <button className="btn-secondary btn-sm" onClick={() => onChange(page - 1)} disabled={page <= 1} aria-label="Página anterior">
           ←
         </button>
         {pages.map((p) => (
@@ -27,14 +27,14 @@ export default function Pagination({ page, totalPages, total, onChange }: Pagina
             key={p}
             onClick={() => onChange(p)}
             aria-current={p === page ? 'page' : undefined}
-            className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
-              p === page ? 'bg-accent text-white' : 'text-body-muted hover:bg-surface-2'
+            className={`rounded-sm px-2.5 py-1.5 text-xs font-medium transition-colors duration-150 ${
+              p === page ? 'bg-accent on-accent' : 'text-body-muted hover:bg-surface-2'
             }`}
           >
             {p}
           </button>
         ))}
-        <button className="btn-secondary !px-2.5 !py-1.5 text-xs" onClick={() => onChange(page + 1)} disabled={page >= totalPages} aria-label="Página siguiente">
+        <button className="btn-secondary btn-sm" onClick={() => onChange(page + 1)} disabled={page >= totalPages} aria-label="Página siguiente">
           →
         </button>
       </div>

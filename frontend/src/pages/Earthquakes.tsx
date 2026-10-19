@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import type { EarthquakeRecord, EarthquakeScope, HealthResponse } from '@shared';
 import { COLOMBIA_DEPARTMENTS } from '@shared';
 import { endpoints } from '../lib/api';
@@ -104,13 +104,13 @@ export default function Earthquakes() {
     [filters.from, filters.to, filters.minMagnitude, filters.source, filters.department, filters.depth].filter(Boolean)
       .length;
 
-  const sgcAvailable = health ? health.earthquakeSources.sgc !== 'misconfigured' : true;
+  const sgcAvailable = health ? health.earthquakeSources?.sgc !== 'misconfigured' : true;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-body sm:text-3xl">Historial de sismos</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-body sm:text-3xl">Historial de sismos</h1>
           <p className="mt-1 text-sm text-body-muted">
             Eventos detectados por SGC y USGS, del más reciente al más antiguo.
           </p>
@@ -121,12 +121,12 @@ export default function Earthquakes() {
       </div>
 
       {/* Alcance */}
-      <div className="mt-6 flex rounded-xl border border-line bg-surface-2 p-1 text-sm font-medium">
+      <div className="mt-6 flex rounded-md border border-line bg-surface-2 p-1 text-sm font-medium">
         <button
           type="button"
           onClick={() => update({ scope: 'co', department: '' })}
-          className={`flex-1 rounded-lg px-4 py-2 transition ${
-            filters.scope === 'co' ? 'bg-accent text-white' : 'text-body-muted hover:text-body'
+          className={`flex-1 rounded-md px-4 py-2 transition-colors duration-150 ${
+            filters.scope === 'co' ? 'bg-accent on-accent' : 'text-body-muted hover:text-body'
           }`}
         >
           Colombia y alrededores
@@ -134,8 +134,8 @@ export default function Earthquakes() {
         <button
           type="button"
           onClick={() => update({ scope: 'world', department: '' })}
-          className={`flex-1 rounded-lg px-4 py-2 transition ${
-            filters.scope === 'world' ? 'bg-accent text-white' : 'text-body-muted hover:text-body'
+          className={`flex-1 rounded-md px-4 py-2 transition-colors duration-150 ${
+            filters.scope === 'world' ? 'bg-accent on-accent' : 'text-body-muted hover:text-body'
           }`}
         >
           Todo el mundo
@@ -144,7 +144,7 @@ export default function Earthquakes() {
 
       {/* Filtros plegables */}
       <form
-        className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface"
+        className="mt-4 overflow-hidden rounded-md border border-line bg-surface"
         onSubmit={(e) => {
           e.preventDefault();
           void load(filters);
@@ -161,14 +161,14 @@ export default function Earthquakes() {
             {activeCount > 0 && (
               <span className="badge border-accent/30 bg-accent/15 text-accent">{activeCount} activos</span>
             )}
-            <svg className={`h-4 w-4 transition-transform text-body-muted ${filtersOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <svg className={`h-4 w-4 transition-transform duration-200 ease-out text-body-muted ${filtersOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
             </svg>
           </span>
         </button>
 
         {filtersOpen && (
-          <div className="grid grid-cols-1 gap-4 border-t border-line px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="reveal-down grid grid-cols-1 gap-4 border-t border-line px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label htmlFor="f-from" className="label">Desde</label>
               <input id="f-from" type="date" className="input" value={filters.from} onChange={(e) => update({ from: e.target.value })} />
@@ -192,7 +192,7 @@ export default function Earthquakes() {
                 min="0"
                 max="8"
                 step="0.5"
-                className="w-full accent-[rgb(var(--color-accent))]"
+                className="h-6 w-full cursor-pointer accent-[rgb(var(--color-accent))]"
                 value={filters.minMagnitude}
                 onChange={(e) => update({ minMagnitude: e.target.value })}
               />
@@ -250,7 +250,7 @@ export default function Earthquakes() {
         <>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((e, i) => (
-              <div key={e.id} style={{ animationDelay: `${Math.min(i * 40, 300)}ms` }}>
+              <div key={e.id} className="stagger" style={{ '--stagger': i } as CSSProperties}>
                 <EarthquakeCard event={e} />
               </div>
             ))}

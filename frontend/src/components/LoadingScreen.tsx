@@ -1,11 +1,11 @@
 export default function LoadingScreen({ label = 'Cargando…' }: { label?: string }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-surface">
-      <div className="relative h-12 w-12">
-        <div className="absolute inset-0 animate-ping rounded-full border-2 border-accent/40" />
-        <div className="absolute inset-2 rounded-full border-2 border-accent" />
+      <div className="relative h-12 w-12" aria-hidden="true">
+        <div className="radar-ring absolute inset-0 rounded-full border border-accent/50" />
+        <div className="absolute inset-3 rounded-full border border-line" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-3 w-3 rounded-full bg-accent" />
+          <div className="h-2.5 w-2.5 rounded-full bg-accent" />
         </div>
       </div>
       <p className="text-sm text-body-muted" role="status">
@@ -52,7 +52,7 @@ export function ErrorState({ title, body, action }: { title: string; body?: stri
 
 export function OfflineNotice() {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-sev-moderate/40 bg-sev-moderate/10 px-3 py-2 text-sm text-sev-moderate">
+    <div className="flex items-center gap-2 rounded-md border border-sev-moderate/40 bg-sev-moderate/10 px-3 py-2 text-sm text-sev-moderate">
       <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>

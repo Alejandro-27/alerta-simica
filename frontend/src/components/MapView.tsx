@@ -24,12 +24,55 @@ interface MapViewProps {
 const OSM_TILES = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-const SEVERITY_COLORS: Record<string, string> = {
+const SEVERITY_VARS: Record<string, string> = {
+  low: '--color-sev-low',
+  moderate: '--color-sev-moderate',
+  strong: '--color-sev-strong',
+  very_strong: '--color-sev-critical',
+};
+
+const SEVERITY_FALLBACK: Record<string, string> = {
   low: '#34d399',
   moderate: '#f59e0b',
   strong: '#f97316',
   very_strong: '#ef4444',
 };
+
+function severityColor(level: string): string {
+  const name = SEVERITY_VARS[level];
+  if (name) {
+    const rgb = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    if (rgb) return `rgb(${rgb})`;
+  }
+  return SEVERITY_FALLBACK[level] ?? SEVERITY_FALLBACK.low;
+}
+
+/** Construye el contenido del popup con DOM + textContent: evita inyección HTML. */
+function popupContent(event: EarthquakeRecord, shortLabel: string): HTMLElement {
+  const wrap = document.createElement('div');
+  wrap.style.minWidth = '200px';
+
+  const header = document.createElement('div');
+  header.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px';
+  const mag = document.createElement('span');
+  mag.style.cssText = 'font-size:20px;font-weight:700';
+  mag.textContent = formatMagnitude(event.magnitude);
+  const sev = document.createElement('span');
+  sev.style.cssText = 'font-size:11px;opacity:.7';
+  sev.textContent = shortLabel;
+  header.append(mag, sev);
+
+  const place = document.createElement('div');
+  place.style.cssText = 'font-size:13px;line-height:1.4';
+  place.textContent = event.place;
+
+  const meta = document.createElement('div');
+  meta.style.cssText = 'font-size:11px;opacity:.6;margin-top:4px';
+  meta.textContent = `${formatRelativeTime(event.eventTime)} · ${depthCategory(event.depth).shortLabel.toLowerCase()} · ${event.source.toUpperCase()}`;
+
+  wrap.append(header, place, meta);
+  return wrap;
+}
 
 /** Mapa Leaflet con basemap clásico de OpenStreetMap y navegación libre. */
 export default function MapView({
@@ -83,21 +126,10 @@ export default function MapView({
         radius: size,
         color: selectedId === ev.id ? '#ffffff' : 'rgba(11, 21, 38, 0.8)',
         weight: selectedId === ev.id ? 3 : 1.5,
-        fillColor: SEVERITY_COLORS[severity.level] ?? '#34d399',
+        fillColor: severityColor(severity.level),
         fillOpacity: 0.85,
       });
-      const popupHtml = `
-        <div style="min-width:200px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-            <span style="font-size:20px;font-weight:800">M${formatMagnitude(ev.magnitude)}</span>
-            <span style="font-size:11px;opacity:.7">${severity.shortLabel}</span>
-          </div>
-          <div style="font-size:13px;line-height:1.4">${ev.place}</div>
-          <div style="font-size:11px;opacity:.6;margin-top:4px">
-            ${formatRelativeTime(ev.eventTime)} · ${depthCategory(ev.depth).shortLabel.toLowerCase()} · ${ev.source.toUpperCase()}
-          </div>
-        </div>`;
-      const popup = L.popup({ maxWidth: 300 }).setContent(popupHtml);
+      const popup = L.popup({ maxWidth: 300 }).setContent(popupContent(ev, severity.shortLabel));
       marker.bindPopup(popup);
       marker.on('click', () => onSelect?.(ev));
       marker.addTo(layer);
@@ -157,13 +189,13 @@ export default function MapView({
   };
 
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl border border-line">
+    <div className="relative w-full overflow-hidden rounded-md border border-line">
       <div ref={containerRef} style={{ height }} className="w-full" aria-label="Mapa de eventos sísmicos" />
       <div className="absolute right-3 top-3 z-[1000] flex flex-col gap-2">
         <button
           type="button"
           onClick={focusColombia}
-          className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-body shadow-sm hover:bg-surface-2"
+          className="rounded-sm border border-line bg-surface px-3 py-1.5 text-xs font-medium text-body shadow-sm hover:bg-surface-2"
           title="Centrar en Colombia"
         >
           Colombia
@@ -171,7 +203,7 @@ export default function MapView({
         <button
           type="button"
           onClick={focusWorld}
-          className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-body shadow-sm hover:bg-surface-2"
+          className="rounded-sm border border-line bg-surface px-3 py-1.5 text-xs font-medium text-body shadow-sm hover:bg-surface-2"
           title="Ver todos los eventos en el mundo"
         >
           Mundo

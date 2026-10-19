@@ -58,7 +58,7 @@ export default function ResetPassword() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-16">
-      <h1 className="text-2xl font-extrabold tracking-tight text-body">Nueva contraseña</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-body">Nueva contraseña</h1>
       <form className="card mt-6 space-y-4" onSubmit={submit}>
         <div>
           <label htmlFor="password" className="label">Nueva contraseña (mínimo 8 caracteres)</label>

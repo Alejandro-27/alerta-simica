@@ -52,7 +52,7 @@ export default function AdminNotifications() {
         <div className="flex items-center gap-2 text-body-muted"><Spinner /> Cargando…</div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-line bg-surface-2">
+          <div className="overflow-x-auto rounded-md border border-line bg-surface-2">
             <table className="w-full text-left text-sm">
               <thead className="bg-surface-3 text-xs uppercase text-body-faint">
                 <tr>

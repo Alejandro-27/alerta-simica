@@ -32,7 +32,7 @@ export default function InstallGuide({ compact = false }: { compact?: boolean })
       </p>
 
       {install.isInstalled && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-sev-low/30 bg-sev-low/10 px-3 py-2 text-sm text-sev-low">
+        <div className="mb-4 flex items-center gap-2 rounded-md border border-sev-low/30 bg-sev-low/10 px-3 py-2 text-sm text-sev-low">
           ✓ Aplicación instalada
         </div>
       )}

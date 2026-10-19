@@ -27,7 +27,7 @@ export default function OfflinePage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <OfflineNotice />
-      <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-body">Últimos eventos conocidos</h1>
+      <h1 className="mt-4 text-2xl font-bold tracking-tight text-body">Últimos eventos conocidos</h1>
       <p className="mt-1 text-sm text-body-muted">
         {lastUpdated
           ? `Información almacenada localmente · actualizada ${formatDate(lastUpdated)}`
@@ -42,12 +42,12 @@ export default function OfflinePage() {
       ) : (
         <ul className="mt-6 space-y-2">
           {items.map((e) => (
-            <li key={e.id} className="card flex items-center justify-between gap-3 !p-4">
+            <li key={e.id} className="card flex items-center justify-between gap-3 p-4">
               <div>
                 <p className="font-semibold text-body">{e.place}</p>
                 <p className="text-xs text-body-muted">{formatDate(e.eventTime)}</p>
               </div>
-              <span className="text-2xl font-black tabular-nums text-accent">{formatMagnitude(e.magnitude)}</span>
+              <span className="text-2xl font-bold tabular-nums text-accent">{formatMagnitude(e.magnitude)}</span>
             </li>
           ))}
         </ul>

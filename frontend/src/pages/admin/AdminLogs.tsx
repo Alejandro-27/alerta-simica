@@ -73,7 +73,7 @@ export default function AdminLogs() {
         <>
           <ul className="space-y-2">
             {items.map((l) => (
-              <li key={l.id} className="card !p-3 text-xs">
+              <li key={l.id} className="card p-3 text-xs">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`font-bold ${levelColor[l.level] ?? 'text-body-muted'}`}>{l.level.toUpperCase()}</span>
                   <span className="badge border-line bg-surface-3 text-body-muted">{l.category}</span>

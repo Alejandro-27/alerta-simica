@@ -1,7 +1,7 @@
 export default function Privacy() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-10">
-      <h1 className="text-2xl font-extrabold tracking-tight text-body sm:text-3xl">Política de privacidad</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-body sm:text-3xl">Política de privacidad</h1>
 
       <section className="card">
         <h2 className="font-bold text-body">Qué datos guardamos</h2>

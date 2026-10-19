@@ -44,7 +44,7 @@ export default function SettingsAlerts() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-extrabold tracking-tight text-body">Mis alertas</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-body">Mis alertas</h1>
       <p className="mt-1 text-sm text-body-muted">
         Configura qué eventos te interesan y hasta dónde se considera «cerca de ti».
       </p>
@@ -68,7 +68,7 @@ export default function SettingsAlerts() {
             type="checkbox"
             checked={settings.enabled}
             onChange={(e) => update({ enabled: e.target.checked })}
-            className="h-5 w-5 accent-[rgb(var(--color-accent))]"
+            className="h-6 w-6 accent-[rgb(var(--color-accent))]"
           />
         </div>
 
@@ -84,7 +84,7 @@ export default function SettingsAlerts() {
                 step="0.5"
                 value={settings.minimumMagnitude}
                 onChange={(e) => update({ minimumMagnitude: parseFloat(e.target.value) })}
-                className="w-full accent-[rgb(var(--color-accent))]"
+                className="h-6 w-full accent-[rgb(var(--color-accent))]"
                 aria-valuetext={`${settings.minimumMagnitude}`}
               />
               <span className="w-12 text-right font-bold tabular-nums text-accent">{settings.minimumMagnitude}</span>
@@ -102,7 +102,7 @@ export default function SettingsAlerts() {
                 step="25"
                 value={settings.alertRadiusKm}
                 onChange={(e) => update({ alertRadiusKm: parseInt(e.target.value, 10) })}
-                className="w-full accent-[rgb(var(--color-accent))]"
+                className="h-6 w-full accent-[rgb(var(--color-accent))]"
                 aria-valuetext={`${settings.alertRadiusKm} km`}
               />
               <span className="w-16 text-right font-bold tabular-nums text-accent">{settings.alertRadiusKm} km</span>
@@ -127,7 +127,7 @@ export default function SettingsAlerts() {
               type="checkbox"
               checked={settings[o.key]}
               onChange={(e) => update({ [o.key]: e.target.checked })}
-              className="h-5 w-5 accent-[rgb(var(--color-accent))]"
+              className="h-6 w-6 accent-[rgb(var(--color-accent))]"
             />
           </div>
         ))}

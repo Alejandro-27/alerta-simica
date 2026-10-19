@@ -40,7 +40,7 @@ export default function Register() {
   return (
     <RedirectIfAuthed>
       <div className="mx-auto max-w-md px-4 py-16">
-        <h1 className="text-2xl font-extrabold tracking-tight text-body">Crear cuenta</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-body">Crear cuenta</h1>
         <p className="mt-1 text-sm text-body-muted">
           Tu ubicación es opcional: la usarás solo para recibir alertas cercanas.
         </p>

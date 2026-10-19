@@ -58,7 +58,7 @@ export default function AdminUsers() {
         <div className="flex items-center gap-2 text-body-muted"><Spinner /> Cargando…</div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-line bg-surface-2">
+          <div className="overflow-x-auto rounded-md border border-line bg-surface-2">
             <table className="w-full text-left text-sm">
               <thead className="bg-surface-3 text-xs uppercase text-body-faint">
                 <tr>
@@ -95,7 +95,7 @@ export default function AdminUsers() {
                     <td className="px-4 py-3 text-xs text-body-muted">{new Date(u.createdAt).toLocaleDateString('es-CO')}</td>
                     <td className="px-4 py-3">
                       <button
-                        className={u.active ? 'btn-secondary !py-1 text-xs' : 'btn-primary !py-1 text-xs'}
+                        className={u.active ? 'btn-secondary btn-xs' : 'btn-primary btn-xs'}
                         onClick={() => void toggle(u.id, !u.active)}
                       >
                         {u.active ? 'Desactivar' : 'Activar'}

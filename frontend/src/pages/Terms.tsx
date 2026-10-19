@@ -3,14 +3,14 @@ import { DISCLAIMER_TEXT } from '@shared';
 export default function Terms() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-10">
-      <h1 className="text-2xl font-extrabold tracking-tight text-body sm:text-3xl">Términos de uso</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-body sm:text-3xl">Términos de uso</h1>
 
       <section className="card">
         <h2 className="font-bold text-body">Naturaleza del servicio</h2>
         <p className="mt-2 text-sm leading-relaxed text-body-muted">
           AlertaSísmica es una plataforma de información sísmica que consulta fuentes externas (Servicio Geológico Colombiano, USGS) y notifica a sus usuarios sobre eventos reportados. No es un sistema de alerta temprana ni sustituye los sistemas oficiales de gestión del riesgo.
         </p>
-        <p className="mt-3 rounded-lg border border-sev-moderate/30 bg-sev-moderate/10 p-3 text-sm text-sev-moderate">
+        <p className="mt-3 rounded-md border border-sev-moderate/30 bg-sev-moderate/10 p-3 text-sm text-sev-moderate">
           {DISCLAIMER_TEXT}
         </p>
       </section>

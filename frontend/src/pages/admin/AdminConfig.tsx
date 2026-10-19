@@ -116,7 +116,7 @@ export default function AdminConfig() {
           </div>
           <div className="flex items-end">
             <label className="flex cursor-pointer items-center gap-3">
-              <input type="checkbox" className="h-5 w-5 accent-[rgb(var(--color-accent))]" checked={config.enabled}
+              <input type="checkbox" className="h-6 w-6 accent-[rgb(var(--color-accent))]" checked={config.enabled}
                 onChange={(e) => setConfig({ ...config, enabled: e.target.checked })} />
               <span className="text-sm font-medium text-body">Motor de alertas activo</span>
             </label>
@@ -132,12 +132,12 @@ export default function AdminConfig() {
         <h2 className="mb-4 text-lg font-bold text-body">Fuentes sísmicas</h2>
         <div className="space-y-2">
           {Object.entries(config.sources).map(([name, s]) => (
-            <div key={name} className="flex items-center justify-between rounded-lg border border-line bg-surface-2 px-4 py-3">
+            <div key={name} className="flex items-center justify-between rounded-md border border-line bg-surface-2 px-4 py-3">
               <div>
                 <p className="font-semibold text-body">{name === 'sgc' ? 'SGC (Servicio Geológico Colombiano)' : name === 'usgs' ? 'USGS' : 'Mock (demo)'}</p>
                 <p className="text-xs text-body-muted">{s.enabled ? 'Consultada cada ciclo del scheduler' : 'Pausada'}</p>
               </div>
-              <button className={s.enabled ? 'btn-secondary !py-1.5 text-xs' : 'btn-primary !py-1.5 text-xs'} onClick={() => toggleSource(name)}>
+              <button className={s.enabled ? 'btn-secondary btn-sm' : 'btn-primary btn-sm'} onClick={() => toggleSource(name)}>
                 {s.enabled ? 'Desactivar' : 'Activar'}
               </button>
             </div>

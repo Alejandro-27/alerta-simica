@@ -52,7 +52,7 @@ export default function SettingsProfile() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-extrabold tracking-tight text-body">Mi perfil</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-body">Mi perfil</h1>
       <p className="mt-1 text-sm text-body-muted">Datos de tu cuenta en AlertaSísmica.</p>
 
       <form className="card mt-6 space-y-4" onSubmit={submit}>

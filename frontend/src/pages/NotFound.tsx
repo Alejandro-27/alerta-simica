@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 export default function NotFound() {
   return (
     <div className="mx-auto flex max-w-md flex-col items-center px-4 py-24 text-center">
-      <p className="text-6xl font-black tabular-nums text-body-faint">404</p>
-      <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-body">Página no encontrada</h1>
+      <p className="text-6xl font-bold tabular-nums text-body-faint">404</p>
+      <h1 className="mt-4 text-2xl font-bold tracking-tight text-body">Página no encontrada</h1>
       <p className="mt-2 text-sm text-body-muted">
         La página que buscas no existe o fue movida.
       </p>

@@ -25,7 +25,7 @@ export default function ForgotPassword() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-16">
-      <h1 className="text-2xl font-extrabold tracking-tight text-body">Recuperar contraseña</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-body">Recuperar contraseña</h1>
       <p className="mt-1 text-sm text-body-muted">
         Ingresa tu correo y te enviaremos un enlace para restablecer la contraseña.
       </p>

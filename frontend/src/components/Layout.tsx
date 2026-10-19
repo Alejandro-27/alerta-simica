@@ -8,7 +8,7 @@ import { endpoints } from '../lib/api';
 function Logo({ small = false }: { small?: boolean }) {
   return (
     <Link to="/" className="flex items-center gap-2.5" aria-label="AlertaSísmica — inicio">
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface-2">
+      <span className="flex h-9 w-9 items-center justify-center rounded-md border border-line bg-surface-2">
         <svg viewBox="0 0 64 64" className="h-6 w-6" aria-hidden="true">
           <circle cx="32" cy="32" r="7" fill="rgb(var(--color-accent))" />
           <circle cx="32" cy="32" r="15" fill="none" stroke="rgb(var(--color-line))" strokeWidth="4" />
@@ -39,7 +39,7 @@ function ThemeToggle() {
       onClick={toggle}
       title={iconLabel}
       aria-label={iconLabel}
-      className="flex items-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-xs font-medium text-body transition-colors hover:border-line-strong hover:bg-surface-3"
+      className="flex items-center gap-2 rounded-md border border-line bg-surface-2 px-3 py-1.5 text-xs font-medium text-body transition-colors hover:border-line-strong hover:bg-surface-3"
     >
       {isDark ? (
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -91,7 +91,7 @@ function MonitoringStatus() {
 
   return (
     <span className="inline-flex items-center gap-2 text-xs font-medium text-body-muted">
-      <span className={`h-2 w-2 rounded-full ${cfg.dot}`} />
+      <span className={`h-2 w-2 rounded-full ${cfg.dot} ${state === 'ok' ? 'pulse-dot' : ''}`} />
       {cfg.label}
     </span>
   );
@@ -124,8 +124,8 @@ export default function Layout() {
                   to={n.to}
                   end={n.to === '/'}
                   className={({ isActive }) =>
-                    `rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                      isActive ? 'text-accent' : 'text-body-muted hover:text-body'
+                    `rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 ${
+                      isActive ? 'bg-accent/10 text-accent' : 'text-body-muted hover:text-body'
                     }`
                   }
                 >
@@ -136,11 +136,11 @@ export default function Layout() {
             {user ? (
               <div className="flex items-center gap-3">
                 {user.role === 'ADMIN' && (
-                  <Link to="/admin" className="text-sm font-medium text-body-muted hover:text-body">
+                  <Link to="/admin" className="inline-flex items-center py-2 text-sm font-medium text-body-muted hover:text-body">
                     Admin
                   </Link>
                 )}
-                <Link to="/settings/alerts" className="btn-primary !py-1.5 text-xs">
+                <Link to="/settings/alerts" className="btn-primary btn-sm">
                   Activar alertas
                 </Link>
                 <Link
@@ -153,10 +153,10 @@ export default function Layout() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Link to="/login" className="btn-secondary !py-1.5 text-xs">
+                <Link to="/login" className="btn-secondary btn-sm">
                   Iniciar sesión
                 </Link>
-                <Link to="/register" className="btn-primary !py-1.5 text-xs">
+                <Link to="/register" className="btn-primary btn-sm">
                   Crear cuenta
                 </Link>
               </div>
@@ -168,7 +168,7 @@ export default function Layout() {
             <button
               type="button"
               onClick={() => setMobileOpen((v) => !v)}
-              className="rounded-lg p-2 text-body-muted hover:bg-surface-2"
+              className="rounded-md p-2 text-body-muted hover:bg-surface-2"
               aria-expanded={mobileOpen}
               aria-label="Abrir menú"
             >
@@ -183,7 +183,7 @@ export default function Layout() {
           </div>
         </div>
         {mobileOpen && (
-          <div className="border-t border-line bg-surface px-4 py-4 md:hidden">
+          <div className="slide-up border-t border-line bg-surface px-4 py-4 md:hidden">
             <div className="mb-3"><MonitoringStatus /></div>
             <nav className="flex flex-col gap-1" aria-label="Navegación móvil">
               {NAV.map((n) => (
@@ -191,13 +191,17 @@ export default function Layout() {
                   key={n.to}
                   to={n.to}
                   end={n.to === '/'}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-body hover:bg-surface-2"
+                  className={({ isActive }) =>
+                    `rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+                      isActive ? 'bg-accent/10 text-accent' : 'text-body hover:bg-surface-2'
+                    }`
+                  }
                 >
                   {n.label}
                 </NavLink>
               ))}
               {user?.role === 'ADMIN' && (
-                <NavLink to="/admin" className="rounded-lg px-3 py-2.5 text-sm font-medium text-body hover:bg-surface-2">
+                <NavLink to="/admin" className="rounded-sm px-3 py-2.5 text-sm font-medium text-body hover:bg-surface-2">
                   Panel de administración
                 </NavLink>
               )}
@@ -205,19 +209,19 @@ export default function Layout() {
             <div className="mt-3 flex gap-2">
               {user ? (
                 <>
-                  <Link to="/settings/profile" className="btn-secondary flex-1 !py-2 text-sm">
+                  <Link to="/settings/profile" className="btn-secondary flex-1">
                     Mi perfil
                   </Link>
-                  <Link to="/settings/alerts" className="btn-primary flex-1 !py-2 text-sm">
+                  <Link to="/settings/alerts" className="btn-primary flex-1">
                     Activar alertas
                   </Link>
                 </>
               ) : (
                 <>
-                  <Link to="/login" className="btn-secondary flex-1 !py-2 text-sm">
+                  <Link to="/login" className="btn-secondary flex-1">
                     Iniciar sesión
                   </Link>
-                  <Link to="/register" className="btn-primary flex-1 !py-2 text-sm">
+                  <Link to="/register" className="btn-primary flex-1">
                     Crear cuenta
                   </Link>
                 </>
@@ -235,11 +239,11 @@ export default function Layout() {
         <div className="mx-auto max-w-6xl px-4">
           <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <Logo small />
-            <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-body-muted" aria-label="Enlaces del pie">
-              <Link to="/earthquakes" className="hover:text-body">Historial</Link>
-              <Link to="/install" className="hover:text-body">Instalar aplicación</Link>
-              <Link to="/privacy" className="hover:text-body">Privacidad</Link>
-              <Link to="/terms" className="hover:text-body">Términos</Link>
+            <nav className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-body-muted" aria-label="Enlaces del pie">
+              <Link to="/earthquakes" className="inline-flex items-center py-1.5 hover:text-body">Historial</Link>
+              <Link to="/install" className="inline-flex items-center py-1.5 hover:text-body">Instalar aplicación</Link>
+              <Link to="/privacy" className="inline-flex items-center py-1.5 hover:text-body">Privacidad</Link>
+              <Link to="/terms" className="inline-flex items-center py-1.5 hover:text-body">Términos</Link>
             </nav>
           </div>
           <p className="max-w-4xl text-xs leading-relaxed text-body-faint">

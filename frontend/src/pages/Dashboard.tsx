@@ -70,7 +70,7 @@ export default function Dashboard() {
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-10">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-body">Hola, {user?.firstName}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-body">Hola, {user?.firstName}</h1>
           <p className="mt-1 text-sm text-body-muted">
             {hasLocation
               ? coords?.source === 'manual'
@@ -84,20 +84,26 @@ export default function Dashboard() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="card">
-          <p className="text-xs text-body-muted">Eventos últimas 24 h</p>
-          <p className="text-3xl font-black tabular-nums text-accent">{loading ? '—' : recent.length}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-body-faint">Eventos últimas 24 h</p>
+          <p className="mt-1 text-3xl font-bold tabular-nums text-body">{loading ? '—' : recent.length}</p>
         </div>
         <div className="card">
-          <p className="text-xs text-body-muted">Alertas cercanas activas</p>
-          <p className={`text-3xl font-black ${hasLocation ? 'text-sev-low' : 'text-body-faint'}`}>
-            {hasLocation ? 'Sí' : 'No'}
-          </p>
+          <p className="text-xs font-medium uppercase tracking-wide text-body-faint">Alertas cercanas</p>
+          <div className="mt-2 flex items-center gap-2">
+            <span className={`h-2 w-2 rounded-full ${hasLocation ? 'bg-sev-low' : 'bg-body-faint'}`} />
+            <span className={`text-lg font-semibold ${hasLocation ? 'text-sev-low' : 'text-body-faint'}`}>
+              {hasLocation ? 'Activas' : 'Inactivas'}
+            </span>
+          </div>
         </div>
         <div className="card">
-          <p className="text-xs text-body-muted">Alertas nacionales</p>
-          <p className={`text-3xl font-black ${user?.alertSettings.nationalAlerts ? 'text-sev-low' : 'text-body-faint'}`}>
-            {user?.alertSettings.nationalAlerts ? 'Sí' : 'No'}
-          </p>
+          <p className="text-xs font-medium uppercase tracking-wide text-body-faint">Alertas nacionales</p>
+          <div className="mt-2 flex items-center gap-2">
+            <span className={`h-2 w-2 rounded-full ${user?.alertSettings.nationalAlerts ? 'bg-sev-low' : 'bg-body-faint'}`} />
+            <span className={`text-lg font-semibold ${user?.alertSettings.nationalAlerts ? 'text-sev-low' : 'text-body-faint'}`}>
+              {user?.alertSettings.nationalAlerts ? 'Activas' : 'Inactivas'}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -107,7 +113,7 @@ export default function Dashboard() {
           <div className="card border-sev-strong/30">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-sev-strong/15 text-xl font-black tabular-nums text-sev-strong">
+                <span className="flex h-12 w-12 items-center justify-center rounded-md bg-sev-strong/15 text-xl font-bold tabular-nums text-sev-strong">
                   {formatMagnitude(lastEvent.magnitude)}
                 </span>
                 <div>
@@ -117,7 +123,7 @@ export default function Dashboard() {
                   </p>
                 </div>
               </div>
-              <Link to={`/earthquakes/${lastEvent.id}`} className="btn-secondary !py-1.5 text-xs">
+              <Link to={`/earthquakes/${lastEvent.id}`} className="btn-secondary btn-sm">
                 Ver detalle
               </Link>
             </div>

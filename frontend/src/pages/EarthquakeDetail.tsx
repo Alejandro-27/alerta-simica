@@ -53,7 +53,7 @@ export default function EarthquakeDetail() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link to="/earthquakes" className="text-sm text-body-muted hover:text-body">← Historial</Link>
+        <Link to="/earthquakes" className="inline-flex items-center py-1.5 text-sm text-body-muted hover:text-body">← Historial</Link>
         {event.demo && (
           <span className="badge border-sev-moderate/30 bg-sev-moderate/10 text-sev-moderate">DATOS DE DEMOSTRACIÓN</span>
         )}
@@ -61,13 +61,13 @@ export default function EarthquakeDetail() {
 
       <header className="card overflow-hidden">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-          <span className={`inline-flex items-center gap-3 rounded-2xl border px-6 py-5 ${severity.color}`}>
-            <span className="text-6xl font-black leading-none tabular-nums">{formatMagnitude(event.magnitude)}</span>
+          <span className={`inline-flex items-center gap-3 rounded-md border px-6 py-5 ${severity.color}`}>
+            <span className="text-6xl font-bold leading-none tabular-nums">{formatMagnitude(event.magnitude)}</span>
             <span className="text-lg font-bold">{severity.shortLabel}</span>
           </span>
           <div className="flex-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-body-faint">Magnitud en la escala de Richter</p>
-            <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-body sm:text-3xl">{event.place}</h1>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-body sm:text-3xl">{event.place}</h1>
             <p className="mt-2 text-sm text-body-muted">{severity.description}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="badge border-line bg-surface-3 text-body-muted">{formatRelativeTime(event.eventTime)}</span>
@@ -81,22 +81,22 @@ export default function EarthquakeDetail() {
 
       {/* Datos simples */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="card !p-5">
+        <div className="card">
           <p className="text-xs font-medium text-body-muted">Profundidad</p>
           <p className="mt-1 text-xl font-bold tabular-nums text-body">{Math.round(event.depth)} km</p>
           <p className="mt-0.5 text-xs text-body-faint">{depth.shortLabel}</p>
         </div>
-        <div className="card !p-5">
+        <div className="card">
           <p className="text-xs font-medium text-body-muted">Hora local</p>
           <p className="mt-1 text-xl font-bold text-body">{formatDate(event.eventTime)}</p>
         </div>
-        <div className="card !p-5">
+        <div className="card">
           <p className="text-xs font-medium text-body-muted">Coordenadas</p>
           <p className="mt-1 text-xl font-bold tabular-nums text-body">
             {event.latitude.toFixed(2)}°, {event.longitude.toFixed(2)}°
           </p>
         </div>
-        <div className="card !p-5">
+        <div className="card">
           <p className="text-xs font-medium text-body-muted">Distancia a ti</p>
           {event.distanceKm !== null && event.distanceKm !== undefined ? (
             <>
@@ -124,7 +124,7 @@ export default function EarthquakeDetail() {
       )}
 
       {/* Detalles técnicos */}
-      <div className="card !p-0 overflow-hidden">
+      <div className="card p-0 overflow-hidden">
         <button
           type="button"
           onClick={() => setShowTechnical((s) => !s)}

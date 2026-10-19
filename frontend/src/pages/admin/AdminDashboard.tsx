@@ -47,9 +47,9 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {cards.map((c) => (
-          <div key={c.label} className="card !p-4">
+          <div key={c.label} className="card p-4">
             <p className="text-xs text-body-muted">{c.label}</p>
-            <p className={`mt-1 text-2xl font-black tabular-nums ${c.label.includes('fallidos') && c.value > 0 ? 'text-sev-critical' : 'text-accent'}`}>
+            <p className={`mt-1 text-2xl font-bold tabular-nums ${c.label.includes('fallidos') && c.value > 0 ? 'text-sev-critical' : 'text-accent'}`}>
               {c.value}
             </p>
           </div>
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
                 M{formatMagnitude(data.lastEvent.magnitude)} · {data.lastEvent.place}
               </p>
               <p className="text-sm text-body-muted">{formatDate(data.lastEvent.eventTime)} · {Math.round(data.lastEvent.depth)} km</p>
-              <Link to={`/earthquakes/${data.lastEvent.id}`} className="btn-secondary mt-3 !py-1.5 text-xs">Ver evento</Link>
+              <Link to={`/earthquakes/${data.lastEvent.id}`} className="btn-secondary btn-sm mt-3">Ver evento</Link>
             </div>
           ) : (
             <p className="text-sm text-body-muted">Sin eventos registrados.</p>
