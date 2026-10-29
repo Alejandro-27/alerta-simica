@@ -1,0 +1,90 @@
+name: Deploy
+
+# Secrets necesarios (Settings → Secrets and variables → Actions):
+#   RENDER_DEPLOY_HOOK_URL  → Render → servicio backend → Settings → Deploy Hook
+#   VERCEL_DEPLOY_HOOK_URL  → Vercel → proyecto → Settings → Git → Deploy Hooks (rama main)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Verificar
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.20.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            backend/pnpm-lock.yaml
+            frontend/pnpm-lock.yaml
+
+      - name: Instalar backend
+        working-directory: backend
+        run: pnpm install --frozen-lockfile
+
+      - name: Instalar frontend
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Verificar backend
+        working-directory: backend
+        run: |
+          pnpm typecheck
+          pnpm build
+          pnpm test
+
+      - name: Verificar frontend
+        working-directory: frontend
+        run: pnpm build
+
+  deploy-backend:
+    name: Deploy backend (Render)
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Disparar Deploy Hook de Render
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::error::Falta el secret RENDER_DEPLOY_HOOK_URL"
+            exit 1
+          fi
+          curl -fsS -X POST "$HOOK" -o /dev/null
+          echo "Deploy de Render disparado."
+
+  deploy-frontend:
+    name: Deploy frontend (Vercel)
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Disparar Deploy Hook de Vercel
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::error::Falta el secret VERCEL_DEPLOY_HOOK_URL"
+            exit 1
+          fi
+          curl -fsS -X POST "$HOOK" -o /dev/null
+          echo "Deploy de Vercel disparado."
