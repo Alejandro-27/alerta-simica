@@ -3,6 +3,7 @@ name: Deploy
 # Secrets necesarios (Settings → Secrets and variables → Actions):
 #   RENDER_DEPLOY_HOOK_URL  → Render → servicio backend → Settings → Deploy Hook
 #   VERCEL_DEPLOY_HOOK_URL  → Vercel → proyecto → Settings → Git → Deploy Hooks (rama main)
+# Nunca pegar las URLs aquí: el repo es público.
 
 on:
   push:
